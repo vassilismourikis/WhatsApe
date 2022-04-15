@@ -7,10 +7,17 @@ public class ProfileName {
     private HashMap<String, ArrayList<Value>> userVideoFilesMap;
     private HashMap<String,Integer> subscribedConversations;
 
-    public ProfileName(String profileName, HashMap<String, ArrayList<Value>> userVideoFilesMap, HashMap<String, Integer> subscribedConversations) {
+    public ProfileName(String profileName) {
         this.profileName = profileName;
         this.userVideoFilesMap = userVideoFilesMap;
         this.subscribedConversations = subscribedConversations;
     }
 
+    public void setProfileName(String profileName) {
+        this.profileName = profileName;
+    }
+
+    public String getProfileName() {
+        return profileName;
+    }
 }

@@ -2,17 +2,16 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Scanner;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.Executors;
 
 public class BrokerNode implements Broker{
 
-    private List<Consumer> registeredConsumers;
-    private List<Publisher> registeredPublishers;
-    private List<Broker> brokers;
+    private static List<Consumer> registeredConsumers;
+    private static List<Publisher> registeredPublishers;
+    private static List<Broker> brokers;
+    private static HashMap<String, List<String>> channelHistory;
+    private static HashMap<String, List<String>> channelSubs;
 
     // All client names, so we can check for duplicates upon registration.
     private static Set<String> names = new HashSet<>();
@@ -134,12 +133,46 @@ public class BrokerNode implements Broker{
                     writer.println("MESSAGE " + name + " has joined");
                 }
                 writers.add(out);
-
+                String channel=null;
                 // Accept messages from this client and broadcast them.
                 while (true) {
                     String input = in.nextLine();
-                    if (input.toLowerCase().startsWith("/quit")) {
+                    if (input.toLowerCase().startsWith("/quit")) { //disconnect
                         return;
+                    }else if(input.startsWith("/channel")){ //user picks channel to send message, broker checks if he is registered and initialises the channel var to know where to keep incoming messages as history
+                        if(channelSubs.get(input.substring(8)).contains(name)){
+                            channel=input.substring(8);
+                        }
+                        else{
+                            var subs=channelSubs.get(input.substring(9));
+                            if(subs!= null){
+                                subs.add(name);
+                                channelSubs.put(input.substring(9), subs);
+                                channel=input.substring(8);
+                            }
+                            else{
+                                out.println("channel doesn't exist");
+                            }
+                        }
+                    }
+                    else if(input.startsWith("/register")){                        //Registers consumer to a channel
+                        var subs=channelSubs.get(input.substring(9));
+                        if(subs!= null){
+                            subs.add(name);
+                            channelSubs.put(input.substring(9), subs);
+                        }
+                        else{
+                            out.println("channel doesn't exist");
+                        }
+                    }else if(input.startsWith("/unregister")){//Unregisters consumer from a channel
+                        var subs=channelSubs.get(input.substring(9));
+                        if(subs!= null){
+                            subs.remove(name);
+                            channelSubs.put(input.substring(9), subs);
+                        }
+                        else{
+                            out.println("not registered to this channel");
+                        }
                     }
                     for (PrintWriter writer : writers) {
                         writer.println("MESSAGE " + name + ": " + input);

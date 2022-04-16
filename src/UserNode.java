@@ -29,7 +29,7 @@ public class UserNode implements Consumer,Publisher {
 
     public static void main(String[] args) throws Exception {
 
-        UserNode client = new UserNode("localhost","");
+        UserNode client = new UserNode("192.168.1.10","");
         try {
             var socket = new Socket(serverAddress, 9090);
             out = new PrintWriter(socket.getOutputStream(), true);

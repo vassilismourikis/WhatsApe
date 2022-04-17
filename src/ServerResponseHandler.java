@@ -4,7 +4,9 @@ import java.io.InputStreamReader;
 import java.net.Socket;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-
+/*
+This class is used for printing the server's responses because in the main scanner blocks the incoming updates while waits for user's input.
+ */
 public class ServerResponseHandler implements Runnable{
     private Socket server;
     private BufferedReader in;

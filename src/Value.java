@@ -1,8 +1,15 @@
 public class Value {
+    private String publisherName;
 
-    private MultimediaFile multimediaFile;
+    public Value(String name){
+        this.publisherName=name;
+    }
 
-    public Value(MultimediaFile multimediaFile) {
-        this.multimediaFile = multimediaFile;
+    public String getPublisherName() {
+        return publisherName;
+    }
+
+    public void setPublisherName(String publisherName) {
+        this.publisherName = publisherName;
     }
 }

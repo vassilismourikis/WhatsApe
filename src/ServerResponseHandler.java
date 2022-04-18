@@ -28,7 +28,7 @@ public class ServerResponseHandler implements Runnable{
                 while(true) {
                     Value value=(Value) in.readObject();
                     serverResponse = value.getMessage();
-                    System.out.println(serverResponse);
+                    System.out.println(value);
                     if(serverResponse==null) break;
                     if (serverResponse.startsWith("SUBMITNAME")) {
                         System.out.println("["+(dtf.format(LocalDateTime.now()))+"]: "+"Specify your UserName by typing /name <name>" );

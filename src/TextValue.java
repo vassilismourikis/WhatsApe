@@ -7,4 +7,8 @@ public class TextValue extends Value implements Serializable {
         super(name);
         this.message=text;
     }
+
+    public String getMessage(){
+        return message;
+    }
 }

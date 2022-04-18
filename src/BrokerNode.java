@@ -10,8 +10,8 @@ import java.util.concurrent.Executors;
 public class BrokerNode implements Broker{
 
     private static List<Broker> brokers;
-    private static HashMap<String, List<Value>> channelHistory;
-    private static HashMap<String, List<String>> channelSubs;
+    private static HashMap<String, List<Value>> channelHistory =new HashMap<String, List<Value>>();
+    private static HashMap<String, List<String>> channelSubs=new HashMap<String, List<String>>();
 
     // All client names, so we can check for duplicates upon registration.
     private static Set<String> names = new HashSet<>();

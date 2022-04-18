@@ -156,7 +156,9 @@ public class BrokerNode implements Broker{
                                 channel=input.substring(8);
                             }
                             else{
-                                out.writeObject(new TextValue("server","channel doesn't exist"));
+                                channelHistory.put(input.substring(9), Arrays.asList(incomingObject));
+                                channelSubs.put(input.substring(9), Arrays.asList(name));
+                                out.writeObject(new TextValue("server","channel doesn't exist, just created"));
                             }
                         }
                     }
@@ -167,7 +169,9 @@ public class BrokerNode implements Broker{
                             channelSubs.put(input.substring(9), subs);
                         }
                         else{
-                            out.writeObject(new TextValue("server","channel doesn't exist"));
+                            channelHistory.put(input.substring(9), Arrays.asList(incomingObject));
+                            channelSubs.put(input.substring(9), Arrays.asList(name));
+                            out.writeObject(new TextValue("server","channel doesn't exist, just created"));
                         }
                     }else if(input.startsWith("/unregister")){//Unregisters consumer from a channel
                         var subs=channelSubs.get(input.substring(9));

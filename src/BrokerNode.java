@@ -9,7 +9,7 @@ import java.util.concurrent.Executors;
 
 public class BrokerNode implements Broker{
 
-    private static List<Broker> brokers;
+    private static List<BrokerInfo> brokers=new ArrayList<BrokerInfo>(Arrays.asList(new BrokerInfo("192.168.1.10"),new BrokerInfo("192.168.1.11"),new BrokerInfo("192.168.1.13")));
     private static HashMap<String, ArrayList<Value>> channelHistory =new HashMap<String, ArrayList<Value>>();
     private static HashMap<String, ArrayList<String>> channelSubs=new HashMap<String, ArrayList<String>>();
 

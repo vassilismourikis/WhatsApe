@@ -1,4 +1,6 @@
 import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -7,17 +9,15 @@ import java.util.concurrent.Executors;
 
 public class BrokerNode implements Broker{
 
-    private static List<Consumer> registeredConsumers;
-    private static List<Publisher> registeredPublishers;
     private static List<Broker> brokers;
-    private static HashMap<String, List<String>> channelHistory;
+    private static HashMap<String, List<Value>> channelHistory;
     private static HashMap<String, List<String>> channelSubs;
 
     // All client names, so we can check for duplicates upon registration.
     private static Set<String> names = new HashSet<>();
 
     // The set of all the print writers for all the clients, used for broadcast.
-    private static Set<PrintWriter> writers = new HashSet<>();
+    private static Set<ObjectOutputStream> writers = new HashSet<>();
 
     public static void main(String[] args) throws Exception {
         System.out.println("The chat server is running...");
@@ -87,8 +87,8 @@ public class BrokerNode implements Broker{
     private static class Handler implements Runnable {
         private String name;
         private Socket socket;
-        private Scanner in;
-        private PrintWriter out;
+        private ObjectInputStream in;
+        private ObjectOutputStream out;
 
         /**
          * Constructs a handler thread, squirreling away the socket. All the interesting
@@ -107,13 +107,13 @@ public class BrokerNode implements Broker{
          */
         public void run() {
             try {
-                in = new Scanner(socket.getInputStream());
-                out = new PrintWriter(socket.getOutputStream(), true);
+                in = new ObjectInputStream(socket.getInputStream());
+                out = new ObjectOutputStream(socket.getOutputStream());
 
                 // Keep requesting a name until we get a unique one.
                 while (true) {
-                    out.println("SUBMITNAME");
-                    name = in.nextLine();
+                    out.writeObject(new TextValue("server","SUBMITNAME"));
+                    name = ((TextValue)in.readObject()).getMessage();
                     if (name == null) {
                         return;
                     }
@@ -128,15 +128,20 @@ public class BrokerNode implements Broker{
                 // Now that a successful name has been chosen, add the socket's print writer
                 // to the set of all writers so this client can receive broadcast messages.
                 // But BEFORE THAT, let everyone else know that the new person has joined!
-                out.println("NAMEACCEPTED " + name);
-                for (PrintWriter writer : writers) {
-                    writer.println("MESSAGE " + name + " has joined");
+                out.writeObject(new TextValue("server","NAMEACCEPTED" + name));
+                for (ObjectOutputStream writer : writers) {
+                    writer.writeObject(new TextValue("server","MESSAGE " + name + " has joined"));
                 }
                 writers.add(out);
                 String channel=null;
                 // Accept messages from this client and broadcast them.
                 while (true) {
-                    String input = in.nextLine();
+                    Value incomingObject= (Value)in.readObject();
+                    String input = incomingObject.getMessage();
+                    if(channel!=null){
+                        List<Value> history=channelHistory.get(channel);
+                        history.add(incomingObject);
+                    }
                     if (input.toLowerCase().startsWith("/quit")) { //disconnect
                         return;
                     }else if(input.startsWith("/channel")){ //user picks channel to send message, broker checks if he is registered and initialises the channel var to know where to keep incoming messages as history
@@ -151,7 +156,7 @@ public class BrokerNode implements Broker{
                                 channel=input.substring(8);
                             }
                             else{
-                                out.println("channel doesn't exist");
+                                out.writeObject(new TextValue("server","channel doesn't exist"));
                             }
                         }
                     }
@@ -162,7 +167,7 @@ public class BrokerNode implements Broker{
                             channelSubs.put(input.substring(9), subs);
                         }
                         else{
-                            out.println("channel doesn't exist");
+                            out.writeObject(new TextValue("server","channel doesn't exist"));
                         }
                     }else if(input.startsWith("/unregister")){//Unregisters consumer from a channel
                         var subs=channelSubs.get(input.substring(9));
@@ -171,11 +176,11 @@ public class BrokerNode implements Broker{
                             channelSubs.put(input.substring(9), subs);
                         }
                         else{
-                            out.println("not registered to this channel");
+                            out.writeObject(new TextValue("server","not registered to this channel"));
                         }
                     }
-                    for (PrintWriter writer : writers) {
-                        writer.println("MESSAGE " + name + ": " + input);
+                    for (ObjectOutputStream writer : writers) {
+                        writer.writeObject(new TextValue("server","MESSAGE " + name + ": " + input));
                     }
                 }
             } catch (Exception e) {
@@ -187,8 +192,12 @@ public class BrokerNode implements Broker{
                 if (name != null) {
                     System.out.println(name + " is leaving");
                     names.remove(name);
-                    for (PrintWriter writer : writers) {
-                        writer.println("MESSAGE " + name + " has left");
+                    for (ObjectOutputStream writer : writers) {
+                        try {
+                            writer.writeObject(new TextValue("server", "MESSAGE " + name + " has left"));
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
                     }
                 }
                 try {

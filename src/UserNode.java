@@ -1,3 +1,4 @@
+import java.io.ObjectOutputStream;
 import java.io.PrintWriter;
 import java.net.Socket;
 import java.util.ArrayList;
@@ -8,7 +9,7 @@ public class UserNode implements Consumer,Publisher {
 
     static Scanner scanner = new Scanner(System.in);
     static String serverAddress;
-    static PrintWriter out;
+    static ObjectOutputStream out;
 
 
 
@@ -32,18 +33,20 @@ public class UserNode implements Consumer,Publisher {
         UserNode client = new UserNode("192.168.1.10","");
         try {
             var socket = new Socket(serverAddress, 9090);
-            out = new PrintWriter(socket.getOutputStream(), true);
+            out = new ObjectOutputStream(socket.getOutputStream());
             ServerResponseHandler serverConn = new ServerResponseHandler(socket);
             new Thread(serverConn).start();
-            String input;
+            String input,channel=null;
             while (true) {
                 input=scanner.nextLine();
                 if(input.startsWith("/name")){
                     client.setProfileName(input.substring(5));
-                    out.println(client.getProfileName());
+                    out.writeObject(new TextValue(getProfileName(),client.getProfileName()));
                     continue;
+                }else if(input.startsWith("/channel")){ //user picks channel to send message, broker checks if he is registered and initialises the channel var to know where to keep incoming messages as history
+                        channel = input.substring(8);
                 }
-                    out.println(input);
+                    out.writeObject(new TextValue(channel,input));
 
             }
         } finally {

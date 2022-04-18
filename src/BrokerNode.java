@@ -10,8 +10,8 @@ import java.util.concurrent.Executors;
 public class BrokerNode implements Broker{
 
     private static List<Broker> brokers;
-    private static HashMap<String, List<Value>> channelHistory =new HashMap<String, List<Value>>();
-    private static HashMap<String, List<String>> channelSubs=new HashMap<String, List<String>>();
+    private static HashMap<String, ArrayList<Value>> channelHistory =new HashMap<String, ArrayList<Value>>();
+    private static HashMap<String, ArrayList<String>> channelSubs=new HashMap<String, ArrayList<String>>();
 
     // All client names, so we can check for duplicates upon registration.
     private static Set<String> names = new HashSet<>();
@@ -145,8 +145,8 @@ public class BrokerNode implements Broker{
                     if (input.toLowerCase().startsWith("/quit")) { //disconnect
                         return;
                     }else if(input.startsWith("/channel")){ //user picks channel to send message, broker checks if he is registered and initialises the channel var to know where to keep incoming messages as history
-                        if(channelSubs.get(input.substring(8)).contains(name)){
-                            channel=input.substring(8);
+                        if(channelSubs.get(input.substring(8))!=null){
+                            if(channelSubs.get(input.substring(8)).contains(name)) channel=input.substring(8);
                         }
                         else{
                             var subs=channelSubs.get(input.substring(9));
@@ -156,8 +156,8 @@ public class BrokerNode implements Broker{
                                 channel=input.substring(8);
                             }
                             else{
-                                channelHistory.put(input.substring(9), Arrays.asList(incomingObject));
-                                channelSubs.put(input.substring(9), Arrays.asList(name));
+                                channelHistory.put(input.substring(9), new ArrayList<Value>(Arrays.asList(incomingObject)));
+                                channelSubs.put(input.substring(9), new ArrayList<String>(Arrays.asList(name)));
                                 out.writeObject(new TextValue("server","channel doesn't exist, just created"));
                             }
                         }
@@ -169,8 +169,8 @@ public class BrokerNode implements Broker{
                             channelSubs.put(input.substring(9), subs);
                         }
                         else{
-                            channelHistory.put(input.substring(9), Arrays.asList(incomingObject));
-                            channelSubs.put(input.substring(9), Arrays.asList(name));
+                            channelHistory.put(input.substring(9), new ArrayList<Value>(Arrays.asList(incomingObject)));
+                            channelSubs.put(input.substring(9), new ArrayList<String>(Arrays.asList(name)));
                             out.writeObject(new TextValue("server","channel doesn't exist, just created"));
                         }
                     }else if(input.startsWith("/unregister")){//Unregisters consumer from a channel
@@ -188,7 +188,7 @@ public class BrokerNode implements Broker{
                     }
                 }
             } catch (Exception e) {
-                System.out.println(e);
+                e.printStackTrace();
             } finally {
                 if (out != null) {
                     writers.remove(out);

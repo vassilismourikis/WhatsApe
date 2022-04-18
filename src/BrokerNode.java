@@ -137,7 +137,7 @@ public class BrokerNode implements Broker{
                 // Accept messages from this client and broadcast them.
                 while (true) {
                     Value incomingObject= (Value)in.readObject();
-                    String input = incomingObject.getMessage();
+                    String input =((TextValue)incomingObject).getMessage();
                     if(channel!=null){
                         List<Value> history=channelHistory.get(channel);
                         history.add(incomingObject);

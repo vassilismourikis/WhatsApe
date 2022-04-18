@@ -27,7 +27,7 @@ public class ServerResponseHandler implements Runnable{
 
                 while(true) {
                     Value value=(Value) in.readObject();
-                    serverResponse = value.getMessage();
+                    serverResponse = ((TextValue)value).getMessage();
                     System.out.println(value);
                     if(serverResponse==null) break;
                     if (serverResponse.startsWith("SUBMITNAME")) {

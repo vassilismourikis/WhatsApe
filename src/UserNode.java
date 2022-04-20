@@ -1,8 +1,6 @@
 import java.io.ObjectOutputStream;
-import java.io.PrintWriter;
 import java.net.Socket;
-import java.util.ArrayList;
-import java.util.Scanner;
+import java.util.*;
 
 public class UserNode implements Consumer,Publisher {
     private static ProfileName profileName;
@@ -10,6 +8,7 @@ public class UserNode implements Consumer,Publisher {
     static Scanner scanner = new Scanner(System.in);
     static String serverAddress;
     static ObjectOutputStream out;
+    static List<BrokerInfo> brokers=new ArrayList<BrokerInfo>(Arrays.asList(new BrokerInfo("192.168.1.10"),new BrokerInfo("192.168.1.11"),new BrokerInfo("192.168.1.13")));
 
 
 
@@ -18,11 +17,11 @@ public class UserNode implements Consumer,Publisher {
         this.profileName= new ProfileName(name);
     }
 
-    private static String getProfileName() {
+    public static String getProfileName() {
         return profileName.getProfileName();
     }
 
-    private static void setProfileName(String name){
+    public static void setProfileName(String name){
         profileName.setProfileName(name);
     }
 
@@ -30,13 +29,14 @@ public class UserNode implements Consumer,Publisher {
 
     public static void main(String[] args) throws Exception {
 
-        UserNode client = new UserNode("192.168.1.10","");
+        UserNode client = new UserNode(brokers.get(new Random().nextInt(brokers.size())).getIp(),"");
         try {
             var socket = new Socket(serverAddress, 9090);
             out = new ObjectOutputStream(socket.getOutputStream());
-            ServerResponseHandler serverConn = new ServerResponseHandler(socket);
+            ServerResponseHandler serverConn = new ServerResponseHandler(socket,client);
             new Thread(serverConn).start();
             String input,channel=null;
+            System.out.println(client.getProfileName());
             while (true) {
                 input=scanner.nextLine();
                 if(input.startsWith("/name")){

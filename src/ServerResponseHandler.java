@@ -1,6 +1,4 @@
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.io.ObjectInputStream;
 import java.net.Socket;
 import java.time.LocalDateTime;
@@ -11,10 +9,13 @@ This class is used for printing the server's responses because in the main scann
 public class ServerResponseHandler implements Runnable{
     private Socket server;
     private ObjectInputStream in;
+    private UserNode client;
 
-    public ServerResponseHandler(Socket s) throws IOException {
+    public ServerResponseHandler(Socket s,UserNode c) throws IOException {
         this.server = s;
         this.in = new ObjectInputStream(server.getInputStream());
+        this.client=c;
+        client.setProfileName("test");
     }
 
     @Override
@@ -35,6 +36,8 @@ public class ServerResponseHandler implements Runnable{
                         System.out.println("["+(dtf.format(LocalDateTime.now()))+"]: "+"Chatter - " + serverResponse.substring(13) );
                     } else if (serverResponse.startsWith("MESSAGE")) {
                         System.out.println("["+(dtf.format(LocalDateTime.now()))+"]: "+serverResponse.substring(8)  + "\n");
+                    } else{ //brokerinfo
+                        System.out.println("["+(dtf.format(LocalDateTime.now()))+"]: "+serverResponse  + "\n");
                     }
                 }
             }

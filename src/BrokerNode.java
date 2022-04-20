@@ -132,7 +132,6 @@ public class BrokerNode implements Broker{
                     writer.writeObject(new TextValue("server","MESSAGE " + name + " has joined"));
                 }
                 writers.add(out);
-                out.writeObject(new TextValue("server",brokers.get(0).toString()+brokers.get(1).toString()+brokers.get(2).toString()));
                 String channel=null;
                 // Accept messages from this client and broadcast them.
                 while (true) {

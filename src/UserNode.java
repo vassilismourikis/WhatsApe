@@ -31,7 +31,7 @@ public class UserNode implements Consumer,Publisher {
 
         UserNode client = new UserNode(brokers.get(new Random().nextInt(brokers.size())).getIp(),"");
         try {
-            var socket = new Socket(serverAddress, 9090);
+            var socket = new Socket(client.serverAddress, 9090);
             out = new ObjectOutputStream(socket.getOutputStream());
             ServerResponseHandler serverConn = new ServerResponseHandler(socket,client);
             new Thread(serverConn).start();

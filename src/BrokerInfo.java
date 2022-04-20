@@ -27,6 +27,6 @@ public class BrokerInfo {
 
     @Override
     public String toString() {
-        return ip + "\n" + maxHash ;
+        return ip + "\n" + maxHash + "\n";
     }
 }

@@ -25,11 +25,11 @@ public class MD5 {
             while (hashtext.length() < 32) {
                 hashtext = "0" + hashtext;
             }
-            System.out.println(hexArray);
+            //System.out.println(hexArray);
             try {
                 byte[] md5hex = MessageDigest.getInstance("MD5").digest(hashtext.getBytes());
                 BigInteger hash=new BigInteger(MD5.bytesToHex(md5hex),16);
-                System.out.println(hash);
+                //System.out.println(hash);
                 return hash;
             } catch (NoSuchAlgorithmException e) {
                 e.printStackTrace();

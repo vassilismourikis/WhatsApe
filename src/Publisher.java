@@ -28,8 +28,5 @@ public interface Publisher extends Node{
      */
     public void notifyFailure(Broker broker);
 
-    /*
-        This function pushes media to the brokers
-     */
-    public void push(String top,Value value);
+    public void push(String top, Value value);
 }

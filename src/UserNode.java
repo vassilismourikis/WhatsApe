@@ -30,6 +30,7 @@ public class UserNode implements Consumer,Publisher {
     public static void main(String[] args) throws Exception {
 
         UserNode client = new UserNode(brokers.get(new Random().nextInt(brokers.size())).getIp(),"");
+        new MultimediaFile("C:\\Users\\Vasilis Mourikis\\Downloads\\test.mp4",client.getProfileName());
         try {
             var socket = new Socket(client.serverAddress, 9090);
             out = new ObjectOutputStream(socket.getOutputStream());
@@ -45,6 +46,8 @@ public class UserNode implements Consumer,Publisher {
                     continue;
                 }else if(input.startsWith("/channel")){ //user picks channel to send message, broker checks if he is registered and initialises the channel var to know where to keep incoming messages as history
                         channel = input.substring(8);
+                }else if(input.startsWith("/multi")){
+                    push(channel,new MultimediaValue(null,new MultimediaFile("C:\\Users\\Vasilis Mourikis\\Downloads\\test",client.getProfileName())));
                 }
                     out.writeObject(new TextValue(channel,input));
 

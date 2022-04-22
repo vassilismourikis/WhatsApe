@@ -3,7 +3,7 @@ import java.io.ObjectOutputStream;
 import java.net.Socket;
 import java.util.*;
 
-public class UserNode implements Consumer,Publisher {
+public class UserNode {
     private static ProfileName profileName;
 
     static Scanner scanner = new Scanner(System.in);
@@ -47,10 +47,13 @@ public class UserNode implements Consumer,Publisher {
                     continue;
                 }else if(input.startsWith("/channel")){ //user picks channel to send message, broker checks if he is registered and initialises the channel var to know where to keep incoming messages as history
                         channel = input.substring(8);
+                        continue;
                 }else if(input.startsWith("/multi")){
                     push(channel,new MultimediaValue(null,new MultimediaFile("C:\\Users\\Vasilis Mourikis\\Downloads\\test",client.getProfileName())));
-                }
+                }else{
                     out.writeObject(new TextValue(channel,input));
+                }
+
 
             }
         } finally {
@@ -58,65 +61,6 @@ public class UserNode implements Consumer,Publisher {
         }
     }
 
-    @Override
-    public void disconnect(String str) {
-
-    }
-
-    @Override
-    public void register(String topic) {
-
-    }
-
-    @Override
-    public void showConversationData(String topic) {
-
-    }
-
-    @Override
-    public void connect() {
-
-    }
-
-    @Override
-    public void disconnect() {
-
-    }
-
-    @Override
-    public void init() {
-
-    }
-
-    @Override
-    public void updateNodes() {
-
-    }
-
-    @Override
-    public ArrayList<Value> generateChunks(MultimediaFile file) {
-        return null;
-    }
-
-    @Override
-    public ArrayList<Broker> getBrokerList() {
-        return null;
-    }
-
-    @Override
-    public Broker hashTopic(String str) {
-        return null;
-    }
-
-    @Override
-    public void notifyBrokersNewMessage(String message) {
-
-    }
-
-    @Override
-    public void notifyFailure(Broker broker) {
-
-    }
 
     public static void push(String top, MultimediaValue file) throws IOException {
         byte[] chunks = file.getMultimediaFile().getMultimediaFileChunk();

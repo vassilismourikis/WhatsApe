@@ -39,10 +39,6 @@ public class MultimediaFile {
         ParseContext context = new ParseContext();
 
         parser.parse(inputstream, handler, metadata, context);
-        System.out.println(handler.toString());
-
-        //getting the list of all meta data elements
-        String[] metadataNames = metadata.names();
 
         this.profileName = profileName;
         this.dateCreated = metadata.get("dcterms:created");

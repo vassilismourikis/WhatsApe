@@ -28,5 +28,5 @@ public interface Publisher extends Node{
      */
     public void notifyFailure(Broker broker);
 
-    public void push(String top, Value value);
+
 }

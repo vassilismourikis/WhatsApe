@@ -7,4 +7,11 @@ public class MultimediaValue extends Value{
         this.multimediaFile = multimediaFile;
     }
 
+    public MultimediaFile getMultimediaFile() {
+        return multimediaFile;
+    }
+
+    public void setMultimediaFile(MultimediaFile multimediaFile) {
+        this.multimediaFile = multimediaFile;
+    }
 }

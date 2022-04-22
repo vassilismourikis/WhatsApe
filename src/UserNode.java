@@ -1,3 +1,4 @@
+import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
 import java.util.*;
@@ -117,8 +118,10 @@ public class UserNode implements Consumer,Publisher {
 
     }
 
-    @Override
-    public void push(String top, Value value) {
-
+    public static void push(String top, MultimediaValue file) throws IOException {
+        byte[] chunks = file.getMultimediaFile().getMultimediaFileChunk();
+        for(int i=0;i<chunks.length;i++) {
+            out.writeObject(chunks[i]);
+        }
     }
 }

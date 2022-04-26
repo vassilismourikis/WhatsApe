@@ -31,7 +31,6 @@ public class UserNode {
     public static void main(String[] args) throws Exception {
 
         UserNode client = new UserNode(brokers.get(new Random().nextInt(brokers.size())).getIp(),"");
-        new MultimediaFile("C:\\Users\\Vasilis Mourikis\\Downloads\\test.mp4",client.getProfileName());
         try {
             var socket = new Socket(client.serverAddress, 9090);
             out = new ObjectOutputStream(socket.getOutputStream());

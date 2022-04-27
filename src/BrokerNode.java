@@ -134,7 +134,7 @@ public class BrokerNode{
                             out.writeObject(new TextValue("server", "not registered to this channel"));
                         }
                     } else if (input.startsWith("LENGTH")) {
-                        chunks = new byte[Integer.getInteger(input.substring(7))];
+                        chunks = new byte[Integer.parseInt(input.substring(7))];
                     }
                     else if (input.startsWith("VIDEOCHANNEL")) {
                         channel=input.substring(12);
@@ -146,7 +146,11 @@ public class BrokerNode{
                 }
             } catch (ClassCastException ce) {
                 if(obj!=null) {
-                    System.out.println("Recieving video chunks");
+                    try {
+                        out.writeObject(new TextValue("server","Recieving video chunks"));
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
                     chunks[counter++] = (byte) obj;
                 }
                 else{

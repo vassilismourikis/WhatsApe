@@ -1,3 +1,7 @@
+import org.apache.tika.exception.TikaException;
+import org.xml.sax.SAXException;
+
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -51,14 +55,20 @@ public class BrokerNode{
          * broadcasts them.
          */
         public void run() {
+            //used for receiving video chunks
+            byte[] chunks = new byte[0];
+            Object obj = null;
+            int counter = 0;
+            String channel=null;
+            //used for receiving video chunks
             try {
                 in = new ObjectInputStream(socket.getInputStream());
                 out = new ObjectOutputStream(socket.getOutputStream());
 
                 // Keep requesting a name until we get a unique one.
                 while (true) {
-                    out.writeObject(new TextValue("server","SUBMITNAME"));
-                    name = ((TextValue)in.readObject()).getMessage();
+                    out.writeObject(new TextValue("server", "SUBMITNAME"));
+                    name = ((TextValue) in.readObject()).getMessage();
                     if (name == null) {
                         return;
                     }
@@ -73,66 +83,97 @@ public class BrokerNode{
                 // Now that a successful name has been chosen, add the socket's print writer
                 // to the set of all writers so this client can receive broadcast messages.
                 // But BEFORE THAT, let everyone else know that the new person has joined!
-                out.writeObject(new TextValue("server","NAMEACCEPTED" + name));
+                out.writeObject(new TextValue("server", "NAMEACCEPTED" + name));
                 for (ObjectOutputStream writer : writers) {
-                    writer.writeObject(new TextValue("server","MESSAGE " + name + " has joined"));
+                    writer.writeObject(new TextValue("server", "MESSAGE " + name + " has joined"));
                 }
                 writers.add(out);
-                String channel=null;
+                chunks = null;
                 // Accept messages from this client and broadcast them.
                 while (true) {
-                    Value incomingObject= (Value)in.readObject();
-                    String input =((TextValue)incomingObject).getMessage();
-                    if(channel!=null){
-                        List<Value> history=channelHistory.get(channel);
+                    obj = in.readObject();
+                    Value incomingObject = (Value) in.readObject();
+                    String input = ((TextValue) incomingObject).getMessage();
+                    if (channel != null) {
+                        List<Value> history = channelHistory.get(channel);
                         history.add(incomingObject);
                     }
                     if (input.toLowerCase().startsWith("/quit")) { //disconnect
                         return;
-                    }else if(input.startsWith("/channel")){ //user picks channel to send message, broker checks if he is registered and initialises the channel var to know where to keep incoming messages as history
-                        if(channelSubs.get(input.substring(8))!=null){
-                            if(channelSubs.get(input.substring(8)).contains(name)) channel=input.substring(8);
-                        }
-                        else{
-                            var subs=channelSubs.get(input.substring(9));
-                            if(subs!= null){
+                    } else if (input.startsWith("/channel")) { //user picks channel to send message, broker checks if he is registered and initialises the channel var to know where to keep incoming messages as history
+                        if (channelSubs.get(input.substring(8)) != null) {
+                            if (channelSubs.get(input.substring(8)).contains(name)) channel = input.substring(8);
+                        } else {
+                            var subs = channelSubs.get(input.substring(9));
+                            if (subs != null) {
                                 subs.add(name);
                                 channelSubs.put(input.substring(9), subs);
-                                channel=input.substring(8);
-                            }
-                            else{
+                                channel = input.substring(8);
+                            } else {
                                 channelHistory.put(input.substring(9), new ArrayList<Value>(Arrays.asList(incomingObject)));
                                 channelSubs.put(input.substring(9), new ArrayList<String>(Arrays.asList(name)));
-                                out.writeObject(new TextValue("server","channel doesn't exist, just created"));
+                                out.writeObject(new TextValue("server", "channel doesn't exist, just created"));
                             }
                         }
-                    }
-                    else if(input.startsWith("/register")){                        //Registers consumer to a channel
-                        var subs=channelSubs.get(input.substring(9));
-                        if(subs!= null){
+                    } else if (input.startsWith("/register")) {                        //Registers consumer to a channel
+                        var subs = channelSubs.get(input.substring(9));
+                        if (subs != null) {
                             subs.add(name);
                             channelSubs.put(input.substring(9), subs);
-                        }
-                        else{
+                        } else {
                             channelHistory.put(input.substring(9), new ArrayList<Value>(Arrays.asList(incomingObject)));
                             channelSubs.put(input.substring(9), new ArrayList<String>(Arrays.asList(name)));
-                            out.writeObject(new TextValue("server","channel doesn't exist, just created"));
+                            out.writeObject(new TextValue("server", "channel doesn't exist, just created"));
                         }
-                    }else if(input.startsWith("/unregister")){//Unregisters consumer from a channel
-                        var subs=channelSubs.get(input.substring(9));
-                        if(subs!= null){
+                    } else if (input.startsWith("/unregister")) {//Unregisters consumer from a channel
+                        var subs = channelSubs.get(input.substring(9));
+                        if (subs != null) {
                             subs.remove(name);
                             channelSubs.put(input.substring(9), subs);
+                        } else {
+                            out.writeObject(new TextValue("server", "not registered to this channel"));
                         }
-                        else{
-                            out.writeObject(new TextValue("server","not registered to this channel"));
-                        }
+                    } else if (input.startsWith("LENGTH")) {
+                        chunks = new byte[Integer.getInteger(input.substring(6))];
+                    }
+                    else if (input.startsWith("VIDEOCHANNEL")) {
+                        channel=input.substring(12);
                     }
                     for (ObjectOutputStream writer : writers) {
                         //TODO: THREAD
-                        writer.writeObject(new TextValue("server","MESSAGE " + name + ": " + input));
+                        writer.writeObject(new TextValue("server", "MESSAGE " + name + ": " + input));
                     }
                 }
+            } catch (ClassCastException ce) {
+                if(obj!=null) {
+                    System.out.println("Recieving video chunks");
+                    chunks[counter++] = (byte) obj;
+                }
+                else{
+                    try {
+                        writeBytesToFile("video.mp4", chunks);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                    try {
+                        var hist = channelHistory.get(channel);
+                        if (hist != null) {
+                            hist.add(new MultimediaValue(channel,new MultimediaFile("video.mp4",name)));
+                            channelHistory.put(channel, hist);
+                        } else {
+                            channelHistory.put(channel, new ArrayList<Value>(Arrays.asList(new MultimediaValue(channel,new MultimediaFile("video.mp4",name)))));
+                        }
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    } catch (TikaException e) {
+                        e.printStackTrace();
+                    } catch (SAXException e) {
+                        e.printStackTrace();
+                    }
+                    counter=0;
+                    chunks=null;
+                }
+
             } catch (Exception e) {
                 e.printStackTrace();
             } finally {
@@ -155,6 +196,14 @@ public class BrokerNode{
                 } catch (IOException e) {
                 }
             }
+        }
+        private static void writeBytesToFile(String fileOutput, byte[] bytes)
+                throws IOException {
+
+            try (FileOutputStream fos = new FileOutputStream(fileOutput)) {
+                fos.write(bytes);
+            }
+
         }
     }
 

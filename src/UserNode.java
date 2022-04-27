@@ -9,8 +9,8 @@ public class UserNode {
     static Scanner scanner = new Scanner(System.in);
     static String serverAddress;
     static ObjectOutputStream out;
-    static List<BrokerInfo> brokers=new ArrayList<BrokerInfo>(Arrays.asList(new BrokerInfo("192.168.1.10"),new BrokerInfo("192.168.1.11"),new BrokerInfo("192.168.1.13")));
-
+    static List<BrokerInfo> brokers=new ArrayList<BrokerInfo>(Arrays.asList(new BrokerInfo("192.168.1.9"),new BrokerInfo("192.168.1.11"),new BrokerInfo("192.168.1.13")));
+    static String channel=null;
 
 
     public UserNode(String serverAddress,String name) {
@@ -36,7 +36,7 @@ public class UserNode {
             out = new ObjectOutputStream(socket.getOutputStream());
             ServerResponseHandler serverConn = new ServerResponseHandler(socket,client);
             new Thread(serverConn).start();
-            String input,channel=null;
+            String input=null;
             System.out.println(client.getProfileName());
             while (true) {
                 input=scanner.nextLine();
@@ -48,7 +48,7 @@ public class UserNode {
                         channel = input.substring(8);
                         continue;
                 }else if(input.startsWith("/multi")){
-                    push(channel,new MultimediaValue(null,new MultimediaFile("C:\\Users\\Vasilis Mourikis\\Downloads\\test",client.getProfileName())));
+                    push(channel,new MultimediaValue(null,new MultimediaFile("C:\\Users\\Vasilis Mourikis\\Downloads\\test.mp4",client.getProfileName())));
                 }else{
                     out.writeObject(new TextValue(channel,input));
                 }
@@ -63,8 +63,11 @@ public class UserNode {
 
     public static void push(String top, MultimediaValue file) throws IOException {
         byte[] chunks = file.getMultimediaFile().getMultimediaFileChunk();
+        out.writeObject(new TextValue(getProfileName(),"LENGTH:"+chunks.length));
+        out.writeObject(new TextValue(getProfileName(),"VIDEOCHANNEL:"+channel));
         for(int i=0;i<chunks.length;i++) {
             out.writeObject(chunks[i]);
         }
+        out.writeObject(null);
     }
 }

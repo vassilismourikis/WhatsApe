@@ -92,7 +92,7 @@ public class BrokerNode{
                 // Accept messages from this client and broadcast them.
                 while (true) {
                     obj = in.readObject();
-                    Value incomingObject = (Value) in.readObject();
+                    Value incomingObject = (Value) obj;
                     String input = ((TextValue) incomingObject).getMessage();
                     if (channel != null) {
                         List<Value> history = channelHistory.get(channel);
@@ -134,7 +134,7 @@ public class BrokerNode{
                             out.writeObject(new TextValue("server", "not registered to this channel"));
                         }
                     } else if (input.startsWith("LENGTH")) {
-                        chunks = new byte[Integer.getInteger(input.substring(6))];
+                        chunks = new byte[Integer.getInteger(input.substring(7))];
                     }
                     else if (input.startsWith("VIDEOCHANNEL")) {
                         channel=input.substring(12);

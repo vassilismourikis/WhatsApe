@@ -66,7 +66,6 @@ public class UserNode {
         out.writeObject(new TextValue(getProfileName(),"VIDEOCHANNEL:"+channel));
         for(byte[] chunk : chunks) {
             out.writeObject(chunk);
-            if(chunk==null) System.out.println("NUUL");
         }
         out.writeObject(null);
     }

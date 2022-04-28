@@ -62,11 +62,11 @@ public class UserNode {
 
 
     public static void push(String top, MultimediaValue file) throws IOException {
-        byte[] chunks = file.getMultimediaFile().getMultimediaFileChunk();
-        out.writeObject(new TextValue(getProfileName(),"LENGTH "+chunks.length));
+        ArrayList<byte[]> chunks = file.getMultimediaFile().getMultimediaFileChunk();
+        out.writeObject(new TextValue(getProfileName(),"LENGTH "+chunks.size()));
         out.writeObject(new TextValue(getProfileName(),"VIDEOCHANNEL:"+channel));
-        for(int i=0;i<chunks.length;i++) {
-            out.writeObject(chunks[i]);
+        for(int i=0;i<chunks.size();i++) {
+            out.writeObject(chunks.get(i));
         }
     }
 }

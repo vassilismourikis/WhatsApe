@@ -2,10 +2,7 @@ import org.apache.commons.lang3.ObjectUtils;
 import org.apache.tika.exception.TikaException;
 import org.xml.sax.SAXException;
 
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
+import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.*;
@@ -57,9 +54,8 @@ public class BrokerNode{
          */
         public void run() {
             //used for receiving video chunks
-            byte[] chunks = new byte[0];
+            ArrayList<byte[]> chunks = new ArrayList<byte[]>();
             Object obj = null;
-            int counter = 0;
             String channel=null;
             //used for receiving video chunks
             try {
@@ -102,7 +98,7 @@ public class BrokerNode{
                             } catch (IOException e) {
                                 e.printStackTrace();
                             }
-                            chunks[counter++] = (byte) obj;
+                            chunks.add((byte[]) obj);
                     }
                     String input =null;
                     try {
@@ -128,8 +124,7 @@ public class BrokerNode{
                         } catch (SAXException e) {
                             e.printStackTrace();
                         }
-                        counter=0;
-                        chunks=null;
+                        chunks= new ArrayList<byte[]>();
                         continue;
                     }
                     if (channel != null) {
@@ -172,9 +167,6 @@ public class BrokerNode{
                         } else {
                             out.writeObject(new TextValue("server", "not registered to this channel"));
                         }
-                    } else if (input.startsWith("LENGTH")) {
-                        chunks = new byte[Integer.parseInt(input.substring(7))];
-                        System.out.println(Integer.parseInt(input.substring(7)));
                     }
                     else if (input.startsWith("VIDEOCHANNEL")) {
                         channel=input.substring(12);
@@ -207,12 +199,17 @@ public class BrokerNode{
                 }
             }
         }
-        private static void writeBytesToFile(String fileOutput, byte[] bytes)
+        private static void writeBytesToFile(String fileName, ArrayList<byte[]> bytes)
                 throws IOException {
 
-            try (FileOutputStream fos = new FileOutputStream(fileOutput)) {
-                fos.write(bytes);
+
+            File file = new File(fileName);
+            BufferedOutputStream fileOutput = new BufferedOutputStream(new FileOutputStream(file));
+
+            for(byte[] bytee : bytes){
+                fileOutput.write(bytee);
             }
+            fileOutput.close();
 
         }
     }

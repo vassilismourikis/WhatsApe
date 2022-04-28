@@ -6,6 +6,8 @@ import java.io.IOException;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
 
 import org.apache.tika.exception.TikaException;
 import org.apache.tika.metadata.Metadata;
@@ -24,7 +26,7 @@ public class MultimediaFile {
     private String framerate;
     private String frameWidth;
     private String frameHeight;
-    private byte[] multimediaFileChunk;
+    private ArrayList<byte[]> multimediaFileChunk;
 
     public MultimediaFile(String multimediaFileName,String profileName) throws IOException, TikaException, SAXException {
         this.multimediaFileName = multimediaFileName;
@@ -54,7 +56,30 @@ public class MultimediaFile {
         FileInputStream fis = new FileInputStream(file);
         fis.read(bytesArray); //read file into bytes[]
         fis.close();
-        this.multimediaFileChunk = bytesArray;
+        int blockSize = 512 * 1024;
+        ArrayList<byte[]> list = new ArrayList<>();
+        //System.out.println(bytesArray.length % blockSize);
+        int blockCount = (bytesArray.length + blockSize - 1) / blockSize;
+        byte[] range = null;
+
+        for (int i = 1; i < blockCount; i++) {
+            int idx = (i - 1) * blockSize;
+            range = Arrays.copyOfRange(bytesArray, idx, idx + blockSize);
+            list.add(range);
+        }
+        int end = -1;
+        if (bytesArray.length % blockSize == 0) {
+            end = bytesArray.length;
+        } else {
+            end = bytesArray.length % blockSize + blockSize * (blockCount - 1);
+        }
+
+        range = Arrays.copyOfRange(bytesArray, (blockCount - 1) * blockSize, end);
+        list.add(range);
+
+
+        //System.out.println(chunks.size() +" Size of chunk list");
+        this.multimediaFileChunk = list;
     }
 
     public String getMultimediaFileName() {
@@ -113,11 +138,11 @@ public class MultimediaFile {
         this.frameHeight = frameHeight;
     }
 
-    public byte[] getMultimediaFileChunk() {
+    public ArrayList<byte[]> getMultimediaFileChunk() {
         return multimediaFileChunk;
     }
 
-    public void setMultimediaFileChunk(byte[] multimediaFileChunk) {
+    public void setMultimediaFileChunk(ArrayList<byte[]> multimediaFileChunk) {
         this.multimediaFileChunk = multimediaFileChunk;
     }
 }

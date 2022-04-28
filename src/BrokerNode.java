@@ -99,6 +99,7 @@ public class BrokerNode{
                                 e.printStackTrace();
                             }
                             chunks.add((byte[]) obj);
+                            continue;
                     }
                     String input =null;
                     try {

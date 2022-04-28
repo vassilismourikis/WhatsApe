@@ -63,11 +63,11 @@ public class UserNode {
 
     public static void push(String top, MultimediaValue file) throws IOException {
         ArrayList<byte[]> chunks = file.getMultimediaFile().getMultimediaFileChunk();
-        out.writeObject(new TextValue(getProfileName(),"LENGTH "+chunks.size()));
         out.writeObject(new TextValue(getProfileName(),"VIDEOCHANNEL:"+channel));
         for(byte[] chunk : chunks) {
             out.writeObject(chunk);
-            if(chunk==null) break;
+            if(chunk==null) System.out.println("NUUL");
         }
+        out.writeObject(null);
     }
 }

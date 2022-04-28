@@ -173,6 +173,7 @@ public class BrokerNode{
                         }
                     } else if (input.startsWith("LENGTH")) {
                         chunks = new byte[Integer.parseInt(input.substring(7))];
+                        System.out.println(Integer.parseInt(input.substring(7)));
                     }
                     else if (input.startsWith("VIDEOCHANNEL")) {
                         channel=input.substring(12);

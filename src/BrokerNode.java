@@ -103,6 +103,7 @@ public class BrokerNode{
                                 e.printStackTrace();
                             }
                             chunks[counter++] = (byte) obj;
+
                         }
                         else{
                             try {
@@ -127,8 +128,9 @@ public class BrokerNode{
                             }
                             counter=0;
                             chunks=null;
-                        }
 
+                        }
+                        continue;
                     }
                     String input = ((TextValue) incomingObject).getMessage();
                     if (channel != null) {

@@ -117,7 +117,7 @@ public class BrokerNode{
                             var hist = channelHistory.get(channel);
                             if (hist != null) {
                                 hist.add(new MultimediaValue(channel,new MultimediaFile("video.mp4",name)));
-                                channelHistory.put(channel, hist);
+                                channelHistory.replace(channel, hist);
                             } else {
                                 channelHistory.put(channel, new ArrayList<Value>(Arrays.asList(new MultimediaValue(channel,new MultimediaFile("video.mp4",name)))));
                             }
@@ -133,8 +133,9 @@ public class BrokerNode{
                         continue;
                     }
                     if (channel != null) {
-                        List<Value> history = channelHistory.get(channel);
+                        ArrayList<Value> history = channelHistory.get(channel);
                         history.add(incomingObject);
+                        channelHistory.replace(channel,history);
                     }
                     if (input.toLowerCase().startsWith("/quit")) { //disconnect
                         return;

@@ -97,14 +97,12 @@ public class BrokerNode{
                     try {
                         incomingObject = (Value) obj;
                     }catch (ClassCastException ce) {
-                        if(obj!=null) {
                             try {
-                                out.writeObject(new TextValue("server", "Recieving video chunks"));
+                                out.writeObject(new TextValue("server","Recieving video chunks"));
                             } catch (IOException e) {
                                 e.printStackTrace();
                             }
                             chunks[counter++] = (byte) obj;
-                        }
                     }
                     String input =null;
                     try {

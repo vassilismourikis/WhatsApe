@@ -68,6 +68,5 @@ public class UserNode {
         for(int i=0;i<chunks.length;i++) {
             out.writeObject(chunks[i]);
         }
-        out.writeObject(null);
     }
 }

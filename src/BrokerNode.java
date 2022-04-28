@@ -92,7 +92,44 @@ public class BrokerNode{
                 // Accept messages from this client and broadcast them.
                 while (true) {
                     obj = in.readObject();
-                    Value incomingObject = (Value) obj;
+                    Value incomingObject=null;
+                    try {
+                        incomingObject = (Value) obj;
+                    }catch (ClassCastException ce) {
+                        if(obj!=null) {
+                            try {
+                                out.writeObject(new TextValue("server","Recieving video chunks"));
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
+                            chunks[counter++] = (byte) obj;
+                        }
+                        else{
+                            try {
+                                writeBytesToFile("video.mp4", chunks);
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
+                            try {
+                                var hist = channelHistory.get(channel);
+                                if (hist != null) {
+                                    hist.add(new MultimediaValue(channel,new MultimediaFile("video.mp4",name)));
+                                    channelHistory.put(channel, hist);
+                                } else {
+                                    channelHistory.put(channel, new ArrayList<Value>(Arrays.asList(new MultimediaValue(channel,new MultimediaFile("video.mp4",name)))));
+                                }
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            } catch (TikaException e) {
+                                e.printStackTrace();
+                            } catch (SAXException e) {
+                                e.printStackTrace();
+                            }
+                            counter=0;
+                            chunks=null;
+                        }
+
+                    }
                     String input = ((TextValue) incomingObject).getMessage();
                     if (channel != null) {
                         List<Value> history = channelHistory.get(channel);
@@ -116,20 +153,20 @@ public class BrokerNode{
                             }
                         }
                     } else if (input.startsWith("/register")) {                        //Registers consumer to a channel
-                        var subs = channelSubs.get(input.substring(9));
+                        var subs = channelSubs.get(input.substring(10));
                         if (subs != null) {
                             subs.add(name);
-                            channelSubs.put(input.substring(9), subs);
+                            channelSubs.put(input.substring(10), subs);
                         } else {
-                            channelHistory.put(input.substring(9), new ArrayList<Value>(Arrays.asList(incomingObject)));
-                            channelSubs.put(input.substring(9), new ArrayList<String>(Arrays.asList(name)));
+                            channelHistory.put(input.substring(10), new ArrayList<Value>(Arrays.asList(incomingObject)));
+                            channelSubs.put(input.substring(10), new ArrayList<String>(Arrays.asList(name)));
                             out.writeObject(new TextValue("server", "channel doesn't exist, just created"));
                         }
                     } else if (input.startsWith("/unregister")) {//Unregisters consumer from a channel
                         var subs = channelSubs.get(input.substring(9));
                         if (subs != null) {
                             subs.remove(name);
-                            channelSubs.put(input.substring(9), subs);
+                            channelSubs.put(input.substring(12), subs);
                         } else {
                             out.writeObject(new TextValue("server", "not registered to this channel"));
                         }
@@ -144,40 +181,6 @@ public class BrokerNode{
                         writer.writeObject(new TextValue("server", "MESSAGE " + name + ": " + input));
                     }
                 }
-            } catch (ClassCastException ce) {
-                if(obj!=null) {
-                    try {
-                        out.writeObject(new TextValue("server","Recieving video chunks"));
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                    chunks[counter++] = (byte) obj;
-                }
-                else{
-                    try {
-                        writeBytesToFile("video.mp4", chunks);
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                    try {
-                        var hist = channelHistory.get(channel);
-                        if (hist != null) {
-                            hist.add(new MultimediaValue(channel,new MultimediaFile("video.mp4",name)));
-                            channelHistory.put(channel, hist);
-                        } else {
-                            channelHistory.put(channel, new ArrayList<Value>(Arrays.asList(new MultimediaValue(channel,new MultimediaFile("video.mp4",name)))));
-                        }
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    } catch (TikaException e) {
-                        e.printStackTrace();
-                    } catch (SAXException e) {
-                        e.printStackTrace();
-                    }
-                    counter=0;
-                    chunks=null;
-                }
-
             } catch (Exception e) {
                 e.printStackTrace();
             } finally {

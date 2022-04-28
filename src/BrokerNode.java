@@ -89,7 +89,7 @@ public class BrokerNode{
                     writer.writeObject(new TextValue("server", "MESSAGE " + name + " has joined"));
                 }
                 writers.add(out);
-                chunks = null;
+
                 // Accept messages from this client and broadcast them.
                 while (true) {
                     obj = in.readObject();

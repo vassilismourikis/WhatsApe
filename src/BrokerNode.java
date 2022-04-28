@@ -129,8 +129,14 @@ public class BrokerNode{
                     }
                     if (channel != null) {
                         ArrayList<Value> history = channelHistory.get(channel);
-                        history.add(incomingObject);
-                        channelHistory.replace(channel,history);
+                        if(history!=null) {
+                            history.add(incomingObject);
+                            channelHistory.replace(channel,history);
+                        }
+                        else{
+                            channelHistory.put(channel,new ArrayList<Value>(Arrays.asList(incomingObject)));
+                        }
+
                     }
                     if (input.toLowerCase().startsWith("/quit")) { //disconnect
                         return;

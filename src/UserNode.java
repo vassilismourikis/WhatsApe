@@ -65,8 +65,9 @@ public class UserNode {
         ArrayList<byte[]> chunks = file.getMultimediaFile().getMultimediaFileChunk();
         out.writeObject(new TextValue(getProfileName(),"LENGTH "+chunks.size()));
         out.writeObject(new TextValue(getProfileName(),"VIDEOCHANNEL:"+channel));
-        for(int i=0;i<chunks.size();i++) {
-            out.writeObject(chunks.get(i));
+        for(byte[] chunk : chunks) {
+            out.writeObject(chunk);
+            if(chunk==null) break;
         }
     }
 }

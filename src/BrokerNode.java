@@ -1,3 +1,4 @@
+import org.apache.commons.lang3.ObjectUtils;
 import org.apache.tika.exception.TikaException;
 import org.xml.sax.SAXException;
 
@@ -91,13 +92,11 @@ public class BrokerNode{
                 chunks = null;
                 // Accept messages from this client and broadcast them.
                 while (true) {
-                    boolean mustPass=false;
                     obj = in.readObject();
                     Value incomingObject=null;
                     try {
                         incomingObject = (Value) obj;
                     }catch (ClassCastException ce) {
-                        mustPass=true;
                         if(obj!=null) {
                             try {
                                 out.writeObject(new TextValue("server","Recieving video chunks"));
@@ -107,35 +106,37 @@ public class BrokerNode{
                             chunks[counter++] = (byte) obj;
 
                         }
-                        else{
-                            try {
-                                writeBytesToFile("video.mp4", chunks);
-                            } catch (IOException e) {
-                                e.printStackTrace();
-                            }
-                            try {
-                                var hist = channelHistory.get(channel);
-                                if (hist != null) {
-                                    hist.add(new MultimediaValue(channel,new MultimediaFile("video.mp4",name)));
-                                    channelHistory.put(channel, hist);
-                                } else {
-                                    channelHistory.put(channel, new ArrayList<Value>(Arrays.asList(new MultimediaValue(channel,new MultimediaFile("video.mp4",name)))));
-                                }
-                            } catch (IOException e) {
-                                e.printStackTrace();
-                            } catch (TikaException e) {
-                                e.printStackTrace();
-                            } catch (SAXException e) {
-                                e.printStackTrace();
-                            }
-                            counter=0;
-                            chunks=null;
 
-                        }
 
                     }
-                    if(mustPass) continue;
-                    String input = ((TextValue) incomingObject).getMessage();
+                    String input =null;
+                    try {
+                        input = ((TextValue) incomingObject).getMessage();
+                    }catch (NullPointerException n){
+                        try {
+                            writeBytesToFile("video.mp4", chunks);
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                        try {
+                            var hist = channelHistory.get(channel);
+                            if (hist != null) {
+                                hist.add(new MultimediaValue(channel,new MultimediaFile("video.mp4",name)));
+                                channelHistory.put(channel, hist);
+                            } else {
+                                channelHistory.put(channel, new ArrayList<Value>(Arrays.asList(new MultimediaValue(channel,new MultimediaFile("video.mp4",name)))));
+                            }
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        } catch (TikaException e) {
+                            e.printStackTrace();
+                        } catch (SAXException e) {
+                            e.printStackTrace();
+                        }
+                        counter=0;
+                        chunks=null;
+
+                    }
                     if (channel != null) {
                         List<Value> history = channelHistory.get(channel);
                         history.add(incomingObject);

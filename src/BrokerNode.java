@@ -97,17 +97,12 @@ public class BrokerNode{
                     try {
                         incomingObject = (Value) obj;
                     }catch (ClassCastException ce) {
-                        if(obj!=null) {
                             try {
                                 out.writeObject(new TextValue("server","Recieving video chunks"));
                             } catch (IOException e) {
                                 e.printStackTrace();
                             }
                             chunks[counter++] = (byte) obj;
-
-                        }
-
-
                     }
                     String input =null;
                     try {
@@ -135,7 +130,7 @@ public class BrokerNode{
                         }
                         counter=0;
                         chunks=null;
-
+                        continue;
                     }
                     if (channel != null) {
                         List<Value> history = channelHistory.get(channel);

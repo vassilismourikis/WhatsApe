@@ -91,11 +91,13 @@ public class BrokerNode{
                 chunks = null;
                 // Accept messages from this client and broadcast them.
                 while (true) {
+                    boolean mustPass=false;
                     obj = in.readObject();
                     Value incomingObject=null;
                     try {
                         incomingObject = (Value) obj;
                     }catch (ClassCastException ce) {
+                        mustPass=true;
                         if(obj!=null) {
                             try {
                                 out.writeObject(new TextValue("server","Recieving video chunks"));
@@ -130,8 +132,9 @@ public class BrokerNode{
                             chunks=null;
 
                         }
-                        continue;
+
                     }
+                    if(mustPass) continue;
                     String input = ((TextValue) incomingObject).getMessage();
                     if (channel != null) {
                         List<Value> history = channelHistory.get(channel);

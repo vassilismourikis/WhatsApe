@@ -9,7 +9,7 @@ public class UserNode {
     static Scanner scanner = new Scanner(System.in);
     static String serverAddress;
     static ObjectOutputStream out;
-    static List<BrokerInfo> brokers=new ArrayList<BrokerInfo>(Arrays.asList(new BrokerInfo("192.168.1.9"),new BrokerInfo("192.168.1.11"),new BrokerInfo("192.168.1.13")));
+    static List<BrokerInfo> brokers=new ArrayList<BrokerInfo>(Arrays.asList(new BrokerInfo("192.168.1.15")));//new BrokerInfo("192.168.1.14"),new BrokerInfo("192.168.1.11"),
     static String channel=null;
 
 
@@ -24,6 +24,10 @@ public class UserNode {
 
     public static void setProfileName(String name){
         profileName.setProfileName(name);
+    }
+
+    public void sendResp(String resp) throws IOException {
+        out.writeObject(new TextValue(getProfileName(),resp));
     }
 
 
@@ -48,7 +52,7 @@ public class UserNode {
                         channel = input.substring(8);
                         out.writeObject(new TextValue(channel,input));
                 }else if(input.startsWith("/upload")){
-                    push(channel,new MultimediaValue(null,new MultimediaFile(input.substring(7),client.getProfileName())));
+                    push(new MultimediaValue(null,new MultimediaFile(input.substring(8),client.getProfileName())));
                 }else if(input.startsWith("/gethistory")) {
                     pull(input.substring(11));
                 }
@@ -64,7 +68,7 @@ public class UserNode {
     }
 
 
-    public static void push(String top, MultimediaValue file) throws IOException {
+    public static void push(MultimediaValue file) throws IOException {
         ArrayList<byte[]> chunks = file.getMultimediaFile().getMultimediaFileChunk();
         out.writeObject(new TextValue(getProfileName(),"new video"));
         for(byte[] chunk : chunks) {

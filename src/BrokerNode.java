@@ -119,7 +119,7 @@ public class BrokerNode{
                             synchronized (channelHistory) {
                                 var hist = channelHistory.get(channel);
                                 if (hist != null) {
-                                    hist.add(new MultimediaValue(channel, new MultimediaFile("video.mp4", name)));
+                                    hist.add(new MultimediaValue(channel, new MultimediaFile("video"+videonum+".mp4", name)));
                                     channelHistory.replace(channel, hist);
                                 } else {
                                     channelHistory.put(channel, new ArrayList<Value>(Arrays.asList(new MultimediaValue(channel, new MultimediaFile("video.mp4", name)))));
@@ -189,7 +189,7 @@ public class BrokerNode{
                         }
                     }
                     else if(input.startsWith("/gethistory")) {
-
+                        UserNode.push(new MultimediaValue(null,new MultimediaFile(input.substring(11),"server")));
                     }
 
                     synchronized (writers) {
@@ -224,19 +224,19 @@ public class BrokerNode{
                 }
             }
         }
-        private static void writeBytesToFile(String fileName, ArrayList<byte[]> bytes)
-                throws IOException {
 
-
-            File file = new File(fileName);
-            BufferedOutputStream fileOutput = new BufferedOutputStream(new FileOutputStream(file));
-
-            for(byte[] bytee : bytes){
-                fileOutput.write(bytee);
-            }
-            fileOutput.close();
-
-        }
     }
+    public static void writeBytesToFile(String fileName, ArrayList<byte[]> bytes)
+            throws IOException {
 
+
+        File file = new File(fileName);
+        BufferedOutputStream fileOutput = new BufferedOutputStream(new FileOutputStream(file));
+
+        for(byte[] bytee : bytes){
+            fileOutput.write(bytee);
+        }
+        fileOutput.close();
+
+    }
 }

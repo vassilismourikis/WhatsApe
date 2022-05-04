@@ -122,7 +122,7 @@ public class BrokerNode{
                                     hist.add(new MultimediaValue(channel, new MultimediaFile("video"+videonum+".mp4", name)));
                                     channelHistory.replace(channel, hist);
                                 } else {
-                                    channelHistory.put(channel, new ArrayList<Value>(Arrays.asList(new MultimediaValue(channel, new MultimediaFile("video.mp4", name)))));
+                                    channelHistory.put(channel, new ArrayList<Value>(Arrays.asList(new MultimediaValue(channel, new MultimediaFile("video"+videonum+".mp4", name)))));
                                 }
                             }
                         } catch (IOException e) {
@@ -189,8 +189,7 @@ public class BrokerNode{
                         }
                     }
                     else if(input.startsWith("/gethistory")) {
-                        ArrayList<byte[]> chunkss = (new MultimediaValue(null,new MultimediaFile(input.substring(11),"server"))).getMultimediaFile().getMultimediaFileChunk();
-                        out.writeObject(new TextValue("server","new video"));
+                        ArrayList<byte[]> chunkss = (new MultimediaValue(null,new MultimediaFile(input.substring(12),"server"))).getMultimediaFile().getMultimediaFileChunk();
                         for(byte[] chunk : chunkss) {
                             out.writeObject(chunk);
                             in.readObject();

@@ -53,6 +53,7 @@ public class ServerResponseHandler implements Runnable{
                         serverResponse = ((TextValue)incomingObject).getMessage();
                     }catch (NullPointerException n){
                         try {
+                            System.out.println("WRITED VIREO---------------");
                             BrokerNode.writeBytesToFile("video"+videonum+".mp4", chunks);
                         } catch (IOException e) {
                             e.printStackTrace();

@@ -55,7 +55,7 @@ public class UserNode {
                 }else if(input.startsWith("/upload")){
                     push(new MultimediaValue(null,new MultimediaFile(input.substring(8),client.getProfileName())));
                 }else if(input.startsWith("/gethistory")) {
-                    pull(input.substring(11));
+                    pull(input);
                 }
                 else{
                     out.writeObject(new TextValue(channel,input));
@@ -79,6 +79,7 @@ public class UserNode {
     }
 
     public static HashMap<String, ArrayList<Value>> pull(String topic) throws IOException {
+        out.writeObject(new TextValue(channel,topic));
         return null;
     }
 }

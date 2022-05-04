@@ -54,7 +54,7 @@ public class UserNode {
                         out.writeObject(new TextValue(channel,input));
                 }else if(input.startsWith("/upload")){
                     push(new MultimediaValue(null,new MultimediaFile(input.substring(8),client.getProfileName())));
-                }else if(input.startsWith("/gethistory")) {
+                }else if(input.startsWith("/getvideo")) {
                     pull(input);
                 }
                 else{

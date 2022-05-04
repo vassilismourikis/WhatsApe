@@ -188,7 +188,7 @@ public class BrokerNode{
                             }
                         }
                     }
-                    else if(input.startsWith("/gethistory")) {
+                    else if(input.startsWith("/getvideo")) {
                         ArrayList<byte[]> chunkss = (new MultimediaValue(null,new MultimediaFile(input.substring(12),"server"))).getMultimediaFile().getMultimediaFileChunk();
                         for(byte[] chunk : chunkss) {
                             out.writeObject(chunk);

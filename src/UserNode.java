@@ -27,6 +27,7 @@ public class UserNode {
     }
 
     public void sendResp(String resp) throws IOException {
+        System.out.println("message send");
         out.writeObject(new TextValue(getProfileName(),resp));
     }
 

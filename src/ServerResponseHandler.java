@@ -36,7 +36,7 @@ public class ServerResponseHandler implements Runnable{
                     obj = in.readObject();
                     Value incomingObject=null;
                     try {
-                        incomingObject = (Value) in.readObject();
+                        incomingObject = (Value) obj;
                     }
                     catch (ClassCastException ce) {
 

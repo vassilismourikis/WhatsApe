@@ -189,7 +189,13 @@ public class BrokerNode{
                         }
                     }
                     else if(input.startsWith("/gethistory")) {
-                        UserNode.push(new MultimediaValue(null,new MultimediaFile(input.substring(11),"server")));
+                        ArrayList<byte[]> chunkss = (new MultimediaValue(null,new MultimediaFile(input.substring(11),"server"))).getMultimediaFile().getMultimediaFileChunk();
+                        out.writeObject(new TextValue("server","new video"));
+                        for(byte[] chunk : chunkss) {
+                            out.writeObject(chunk);
+                            in.readObject();
+                        }
+                        out.writeObject(null);
                     }
 
                     synchronized (writers) {

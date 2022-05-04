@@ -47,9 +47,12 @@ public class UserNode {
                 }else if(input.startsWith("/channel")){ //user picks channel to send message, broker checks if he is registered and initialises the channel var to know where to keep incoming messages as history
                         channel = input.substring(8);
                         out.writeObject(new TextValue(channel,input));
-                }else if(input.startsWith("/multi")){
-                    push(channel,new MultimediaValue(null,new MultimediaFile("C:\\Users\\Vasilis Mourikis\\Downloads\\test.mp4",client.getProfileName())));
-                }else{
+                }else if(input.startsWith("/upload")){
+                    push(channel,new MultimediaValue(null,new MultimediaFile(input.substring(7),client.getProfileName())));
+                }else if(input.startsWith("/gethistory")) {
+                    pull(input.substring(11));
+                }
+                else{
                     out.writeObject(new TextValue(channel,input));
                 }
 
@@ -68,5 +71,9 @@ public class UserNode {
             out.writeObject(chunk);
         }
         out.writeObject(null);
+    }
+
+    public static HashMap<String, ArrayList<Value>> pull(String topic) throws IOException {
+        return null;
     }
 }

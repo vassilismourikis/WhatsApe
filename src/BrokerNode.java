@@ -36,6 +36,7 @@ public class BrokerNode{
         private Socket socket;
         private ObjectInputStream in;
         private ObjectOutputStream out;
+        public static Integer videonum=0;
 
         /**
          * Constructs a handler thread, squirreling away the socket. All the interesting
@@ -94,8 +95,11 @@ public class BrokerNode{
                     try {
                         incomingObject = (Value) obj;
                     }catch (ClassCastException ce) {
+                        synchronized (videonum) {
+                            if (chunks.isEmpty()) videonum++;
+                        }
                             try {
-                                out.writeObject(new TextValue("server","Recieving video chunks"));
+                                out.writeObject(new TextValue("server","Receiving video chunks"));
                             } catch (IOException e) {
                                 e.printStackTrace();
                             }
@@ -107,7 +111,7 @@ public class BrokerNode{
                         input = ((TextValue) incomingObject).getMessage();
                     }catch (NullPointerException n){
                         try {
-                            writeBytesToFile("video.mp4", chunks);
+                            writeBytesToFile("video"+videonum+".mp4", chunks);
                         } catch (IOException e) {
                             e.printStackTrace();
                         }
@@ -183,6 +187,9 @@ public class BrokerNode{
                                 out.writeObject(new TextValue("server", "not registered to this channel"));
                             }
                         }
+                    }
+                    else if(input.startsWith("/gethistory")) {
+
                     }
 
                     synchronized (writers) {

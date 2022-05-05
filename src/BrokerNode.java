@@ -112,7 +112,7 @@ public class BrokerNode{
                         input = ((TextValue) incomingObject).getMessage();
                     }catch (NullPointerException n){
                         try {
-                            writeBytesToFile(videoName, chunks);
+                            writeBytesToFile(videoName.substring(videoName.lastIndexOf("/") + 1), chunks);
                         } catch (IOException e) {
                             e.printStackTrace();
                         }
@@ -123,7 +123,7 @@ public class BrokerNode{
                                     hist.add(new MultimediaValue(channel, new MultimediaFile(videoName, name)));
                                     channelHistory.replace(channel, hist);
                                 } else {
-                                    channelHistory.put(channel, new ArrayList<Value>(Arrays.asList(new MultimediaValue(channel, new MultimediaFile("video"+videonum+".mp4", name)))));
+                                    channelHistory.put(channel, new ArrayList<Value>(Arrays.asList(new MultimediaValue(channel, new MultimediaFile(videoName.substring(videoName.lastIndexOf("/") + 1), name)))));
                                 }
                             }
                         } catch (IOException e) {

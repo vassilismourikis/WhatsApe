@@ -71,15 +71,14 @@ public class UserNode {
 
     public static void push(MultimediaValue file) throws IOException {
         ArrayList<byte[]> chunks = file.getMultimediaFile().getMultimediaFileChunk();
-        out.writeObject(new TextValue(getProfileName(),"new video"));
+        out.writeObject(new TextValue(getProfileName(), "VIDEONAME "+file.getMultimediaFile().getMultimediaFileName()));
         for(byte[] chunk : chunks) {
             out.writeObject(chunk);
         }
         out.writeObject(null);
     }
 
-    public static HashMap<String, ArrayList<Value>> pull(String topic) throws IOException {
+    public static void pull(String topic) throws IOException {
         out.writeObject(new TextValue(channel,topic));
-        return null;
     }
 }

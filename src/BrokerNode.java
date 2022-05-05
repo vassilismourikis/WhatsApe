@@ -58,6 +58,7 @@ public class BrokerNode{
             ArrayList<byte[]> chunks = new ArrayList<byte[]>();
             Object obj = null;
             String channel=null;
+            String videoName=null;
             //used for receiving video chunks
             try {
                 in = new ObjectInputStream(socket.getInputStream());
@@ -111,7 +112,7 @@ public class BrokerNode{
                         input = ((TextValue) incomingObject).getMessage();
                     }catch (NullPointerException n){
                         try {
-                            writeBytesToFile("video"+videonum+".mp4", chunks);
+                            writeBytesToFile(videoName, chunks);
                         } catch (IOException e) {
                             e.printStackTrace();
                         }
@@ -119,7 +120,7 @@ public class BrokerNode{
                             synchronized (channelHistory) {
                                 var hist = channelHistory.get(channel);
                                 if (hist != null) {
-                                    hist.add(new MultimediaValue(channel, new MultimediaFile("video"+videonum+".mp4", name)));
+                                    hist.add(new MultimediaValue(channel, new MultimediaFile(videoName, name)));
                                     channelHistory.replace(channel, hist);
                                 } else {
                                     channelHistory.put(channel, new ArrayList<Value>(Arrays.asList(new MultimediaValue(channel, new MultimediaFile("video"+videonum+".mp4", name)))));
@@ -195,6 +196,8 @@ public class BrokerNode{
                             in.readObject();
                         }
                         out.writeObject(null);
+                    }else if(input.startsWith("VIDEONAME")) {
+                        videoName=input.substring(10);
                     }
 
                     synchronized (writers) {

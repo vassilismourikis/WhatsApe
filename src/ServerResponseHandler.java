@@ -34,6 +34,11 @@ public class ServerResponseHandler implements Runnable{
 
                 while(true) {
                     obj = in.readObject();
+                    try { //try only for printing the history of a channel if goes to catch, it does nothing
+                        channelHistory = (ArrayList<Value>) obj;
+                        System.out.println(channelHistory.size() +"FIRST");
+                    }
+                    catch (Exception e){}
                     Value incomingObject=null;
                     try {
                         incomingObject = (Value) obj;

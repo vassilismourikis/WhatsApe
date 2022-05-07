@@ -136,6 +136,12 @@ public class BrokerNode{
                         return;
                     } else if (input.startsWith("/channel")) { //user picks channel to send message, broker checks if he is registered and initialises the channel var to know where to keep incoming messages as history
                                 channel = input.substring(9);
+                                if(!channelHistory.containsKey(input.substring(9))) {
+                                    synchronized (channelHistory) {
+                                        channelHistory.put(channel, new ArrayList<Value>(Arrays.asList(incomingObject)));
+                                        out.writeObject(new TextValue("server", "channel doesn't exist, just created"));
+                                    }
+                                }
                     }
                     else if(input.startsWith("/getvideo")) {
                         ArrayList<byte[]> chunkss = (new MultimediaValue(null,new MultimediaFile(input.substring(10),"server"))).getMultimediaFile().getMultimediaFileChunk();
@@ -153,13 +159,8 @@ public class BrokerNode{
                     if (channel != null) {
                         synchronized (channelHistory) {
                             ArrayList<Value> history = channelHistory.get(channel);
-                            if (history != null) {
-                                history.add(incomingObject);
-                                channelHistory.replace(channel, history);
-                            } else {
-                                channelHistory.put(channel, new ArrayList<Value>(Arrays.asList(incomingObject)));
-                                out.writeObject(new TextValue("server", "channel doesn't exist, just created"));
-                            }
+                            history.add(incomingObject);
+                            channelHistory.replace(channel, history);
                         }
                     }
                     else{

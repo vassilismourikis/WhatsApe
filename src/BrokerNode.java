@@ -36,7 +36,6 @@ public class BrokerNode{
         private Socket socket;
         private ObjectInputStream in;
         private ObjectOutputStream out;
-        public static Integer videonum=0;
 
         /**
          * Constructs a handler thread, squirreling away the socket. All the interesting
@@ -96,9 +95,6 @@ public class BrokerNode{
                     try {
                         incomingObject = (Value) obj;
                     }catch (ClassCastException ce) {
-                        synchronized (videonum) {
-                            if (chunks.isEmpty()) videonum++;
-                        }
                             try {
                                 out.writeObject(new TextValue("server","Receiving video chunks"));
                             } catch (IOException e) {
@@ -136,17 +132,7 @@ public class BrokerNode{
                         chunks= new ArrayList<byte[]>();
                         continue;
                     }
-                    if (channel != null) {
-                        synchronized (channelHistory) {
-                            ArrayList<Value> history = channelHistory.get(channel);
-                            if (history != null) {
-                                history.add(incomingObject);
-                                channelHistory.replace(channel, history);
-                            } else {
-                                channelHistory.put(channel, new ArrayList<Value>(Arrays.asList(incomingObject)));
-                            }
-                        }
-                    }
+
                     if (input.toLowerCase().startsWith("/quit")) { //disconnect
                         return;
                     } else if (input.startsWith("/channel")) { //user picks channel to send message, broker checks if he is registered and initialises the channel var to know where to keep incoming messages as history
@@ -166,28 +152,6 @@ public class BrokerNode{
                                 }
                             }
                         }
-                    } else if (input.startsWith("/register")) {//Registers consumer to a channel
-                        synchronized (this) {
-                            var subs = channelSubs.get(input.substring(10));
-                            if (subs != null) {
-                                subs.add(name);
-                                channelSubs.put(input.substring(10), subs);
-                            } else {
-                                channelHistory.put(input.substring(10), new ArrayList<Value>(Arrays.asList(incomingObject)));
-                                channelSubs.put(input.substring(10), new ArrayList<String>(Arrays.asList(name)));
-                                out.writeObject(new TextValue("server", "channel doesn't exist, just created"));
-                            }
-                        }
-                    } else if (input.startsWith("/unregister")) {//Unregisters consumer from a channel
-                        synchronized (this) {
-                            var subs = channelSubs.get(input.substring(9));
-                            if (subs != null) {
-                                subs.remove(name);
-                                channelSubs.put(input.substring(12), subs);
-                            } else {
-                                out.writeObject(new TextValue("server", "not registered to this channel"));
-                            }
-                        }
                     }
                     else if(input.startsWith("/getvideo")) {
                         ArrayList<byte[]> chunkss = (new MultimediaValue(null,new MultimediaFile(input.substring(10),"server"))).getMultimediaFile().getMultimediaFileChunk();
@@ -202,14 +166,19 @@ public class BrokerNode{
                         out.writeObject(channelHistory.get(input.substring(12)));
                     }
 
-                    synchronized (channelHistory) {
-                        var hist = channelHistory.get(channel);
-                        if (hist != null) {
-                            hist.add(new TextValue("server", "MESSAGE " + name + ": " + input));
-                            channelHistory.replace(channel, hist);
-                        } else {
-                            channelHistory.put(channel, new ArrayList<Value>(Arrays.asList(new TextValue("server", "MESSAGE " + name + ": " + input))));
+                    if (channel != null) {
+                        synchronized (channelHistory) {
+                            ArrayList<Value> history = channelHistory.get(channel);
+                            if (history != null) {
+                                history.add(incomingObject);
+                                channelHistory.replace(channel, history);
+                            } else {
+                                channelHistory.put(channel, new ArrayList<Value>(Arrays.asList(incomingObject)));
+                            }
                         }
+                    }
+                    else{
+                        out.writeObject(new TextValue("server", "SPECIFY CHANNEL"));
                     }
 
                     synchronized (writers) {

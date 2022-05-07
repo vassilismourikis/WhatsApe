@@ -1,5 +1,6 @@
 import java.io.IOException;
 import java.io.ObjectOutputStream;
+import java.math.BigInteger;
 import java.net.Socket;
 import java.util.*;
 
@@ -9,13 +10,26 @@ public class UserNode {
     static Scanner scanner = new Scanner(System.in);
     static String serverAddress;
     static ObjectOutputStream out;
-    static List<BrokerInfo> brokers=new ArrayList<BrokerInfo>(Arrays.asList(new BrokerInfo("192.168.1.14")));//new BrokerInfo("192.168.1.14"),new BrokerInfo("192.168.1.11"),
+    static List<BrokerInfo> brokers=new ArrayList<BrokerInfo>(Arrays.asList(new BrokerInfo("192.168.1.14"),new BrokerInfo("192.168.1.11"),new BrokerInfo("192.168.1.15")));
     static String channel=null;
+    static ArrayList<BigInteger> brokerHashes=new ArrayList<BigInteger>() {
+        {
+            add(brokers.get(0).getMaxHash());
+
+            add(brokers.get(1).getMaxHash());
+
+            add(brokers.get(2).getMaxHash());
+        }
+    };
 
 
     public UserNode(String serverAddress,String name) {
         this.serverAddress = serverAddress;
         this.profileName= new ProfileName(name);
+        Collections.sort(brokerHashes);
+        for(BigInteger b : brokerHashes){
+            System.out.println(b);
+        }
     }
 
     public static String getProfileName() {
@@ -52,8 +66,8 @@ public class UserNode {
                     out.flush();
                     continue;
                 }else if(input.startsWith("/channel")){ //user picks channel to send message, broker checks if he is registered and initialises the channel var to know where to keep incoming messages as history
-                        channel = input.substring(9);
-                        out.writeObject(new TextValue(channel,input));
+                    channel = input.substring(9);
+                    out.writeObject(new TextValue(channel,input));
                     out.flush();
                 }else if(input.startsWith("/upload")){
                     push(new MultimediaValue(null,new MultimediaFile(input.substring(8),client.getProfileName())));

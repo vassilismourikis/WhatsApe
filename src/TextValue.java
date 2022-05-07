@@ -8,6 +8,7 @@ public class TextValue extends Value implements Serializable {
         this.message=text;
     }
 
+    @Override
     public String getMessage(){
         return message;
     }

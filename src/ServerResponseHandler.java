@@ -6,8 +6,7 @@ import java.io.ObjectInputStream;
 import java.net.Socket;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.*;
 
 /*
 This class is used for printing the server's responses because in the main scanner blocks the incoming updates while waits for user's input.
@@ -38,7 +37,18 @@ public class ServerResponseHandler implements Runnable{
                     try {
                         incomingObject = (Value) obj;
                     }
-                    catch (ClassCastException ce) {
+                    catch (ClassCastException ce) { //catch for pulling (when object is byte chunks)
+                        try{ //try only for printing the history of a channel if goes to catch it does nothing
+                            ArrayList<Value> channelHistory=(ArrayList<Value>)obj;
+                            for(Value v : channelHistory){
+                                System.out.println(v.getMessage());
+                            }
+
+                            continue; //not to execute anything else
+                        }catch(Exception e){
+                            //do nothing
+                            System.out.println("CATCH OF HISTORY");
+                        }
 
                         if (chunks.isEmpty()) videonum++;
                         try {

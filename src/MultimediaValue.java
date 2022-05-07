@@ -14,4 +14,9 @@ public class MultimediaValue extends Value{
     public void setMultimediaFile(MultimediaFile multimediaFile) {
         this.multimediaFile = multimediaFile;
     }
+
+    @Override
+    public String getMessage(){
+        return multimediaFile.getMultimediaFileName();
+    }
 }

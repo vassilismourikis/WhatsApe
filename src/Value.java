@@ -15,4 +15,7 @@ public class Value implements Serializable {
         this.publisherName = publisherName;
     }
 
+    public String getMessage(){return null;}
+
+
 }

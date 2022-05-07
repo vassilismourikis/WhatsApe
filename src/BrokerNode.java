@@ -111,23 +111,6 @@ public class BrokerNode{
                         } catch (IOException e) {
                             e.printStackTrace();
                         }
-//                        try {
-//                            synchronized (channelHistory) {
-//                                var hist = channelHistory.get(channel);
-//                                if (hist != null) {
-//                                    hist.add(new MultimediaValue(channel, new MultimediaFile(videoName, name)));
-//                                    channelHistory.replace(channel, hist);
-//                                } else {
-//                                    channelHistory.put(channel, new ArrayList<Value>(Arrays.asList(new MultimediaValue(channel, new MultimediaFile(videoName.substring(videoName.lastIndexOf("/") + 1), name)))));
-//                                }
-//                            }
-//                        } catch (IOException e) {
-//                            e.printStackTrace();
-//                        } catch (TikaException e) {
-//                            e.printStackTrace();
-//                        } catch (SAXException e) {
-//                            e.printStackTrace();
-//                        }
                         chunks= new ArrayList<byte[]>();
                         continue;
                     }
@@ -136,8 +119,9 @@ public class BrokerNode{
                         return;
                     } else if (input.startsWith("/channel")) { //user picks channel to send message, broker checks if he is registered and initialises the channel var to know where to keep incoming messages as history
                                 channel = input.substring(9);
-                                if(!channelHistory.containsKey(input.substring(9))) {
-                                    synchronized (channelHistory) {
+                                synchronized (channelHistory) {
+                                    if(!channelHistory.containsKey(channel)) {
+
                                         channelHistory.put(channel, new ArrayList<Value>());
                                         out.writeObject(new TextValue("server", "channel doesn't exist, just created"));
 

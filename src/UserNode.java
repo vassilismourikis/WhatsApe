@@ -50,7 +50,7 @@ public class UserNode {
                     out.writeObject(new TextValue(getProfileName(),client.getProfileName()));
                     continue;
                 }else if(input.startsWith("/channel")){ //user picks channel to send message, broker checks if he is registered and initialises the channel var to know where to keep incoming messages as history
-                        channel = input.substring(8);
+                        channel = input.substring(9);
                         out.writeObject(new TextValue(channel,input));
                 }else if(input.startsWith("/upload")){
                     push(new MultimediaValue(null,new MultimediaFile(input.substring(8),client.getProfileName())));

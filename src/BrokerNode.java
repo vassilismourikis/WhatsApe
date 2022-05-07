@@ -136,15 +136,14 @@ public class BrokerNode{
                             in.readObject();
                         }
                         out.writeObject(null);
+                        continue;
                     }else if(input.startsWith("VIDEONAME")) {
                         videoName=input.substring(10);
                     }else if(input.startsWith("/gethistory")){
-                        ArrayList<Value> ar;
                         synchronized (channelHistory) {
-                            ar=channelHistory.get(input.substring(12));
+                            out.writeObject(channelHistory.get(input.substring(12)));
                         }
-                            out.writeObject(ar);
-
+                        continue;
                     }
 
                     if (channel != null) {

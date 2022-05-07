@@ -28,6 +28,7 @@ public class ServerResponseHandler implements Runnable{
         DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss");
         ArrayList<byte[]> chunks = new ArrayList<byte[]>();
         Integer videonum=0;
+        String serverResponse=null;
         ArrayList<Value> channelHistory=null;
             try{
 

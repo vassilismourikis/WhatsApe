@@ -126,13 +126,13 @@ public class BrokerNode{
 //                                    channelHistory.put(channel, new ArrayList<Value>(Arrays.asList(new MultimediaValue(channel, new MultimediaFile(videoName.substring(videoName.lastIndexOf("/") + 1), name)))));
 //                                }
 //                            }
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        } catch (TikaException e) {
-                            e.printStackTrace();
-                        } catch (SAXException e) {
-                            e.printStackTrace();
-                        }
+//                        } catch (IOException e) {
+//                            e.printStackTrace();
+//                        } catch (TikaException e) {
+//                            e.printStackTrace();
+//                        } catch (SAXException e) {
+//                            e.printStackTrace();
+//                        }
                         chunks= new ArrayList<byte[]>();
                         continue;
                     }

@@ -12,7 +12,6 @@ public class BrokerNode{
 
     private static List<BrokerInfo> brokers=new ArrayList<BrokerInfo>(Arrays.asList(new BrokerInfo("192.168.1.10"),new BrokerInfo("192.168.1.11"),new BrokerInfo("192.168.1.13")));
     private static HashMap<String, ArrayList<Value>> channelHistory =new HashMap<String, ArrayList<Value>>();
-    private static HashMap<String, ArrayList<String>> channelSubs=new HashMap<String, ArrayList<String>>();
 
     // All client names, so we can check for duplicates upon registration.
     private static Set<String> names = new HashSet<>();
@@ -136,20 +135,15 @@ public class BrokerNode{
                     if (input.toLowerCase().startsWith("/quit")) { //disconnect
                         return;
                     } else if (input.startsWith("/channel")) { //user picks channel to send message, broker checks if he is registered and initialises the channel var to know where to keep incoming messages as history
+
                         synchronized (this) {
-                            if (channelSubs.get(input.substring(9)) != null) {
-                                if (channelSubs.get(input.substring(9)).contains(name)) channel = input.substring(8);
+                            if (channelHistory.get(channel) != null) {
+                                channel = input.substring(9);
                             } else {
-                                var subs = channelSubs.get(input.substring(9));
-                                if (subs != null) {
-                                    subs.add(name);
-                                    channelSubs.put(input.substring(9), subs);
-                                    channel = input.substring(9);
-                                } else {
-                                    channelHistory.put(input.substring(9), new ArrayList<Value>(Arrays.asList(incomingObject)));
-                                    channelSubs.put(input.substring(9), new ArrayList<String>(Arrays.asList(name)));
-                                    out.writeObject(new TextValue("server", "channel doesn't exist, just created"));
-                                }
+                                channel = input.substring(9);
+                                channelHistory.put(input.substring(9), new ArrayList<Value>(Arrays.asList(incomingObject)));
+                                out.writeObject(new TextValue("server", "channel doesn't exist, just created"));
+
                             }
                         }
                     }

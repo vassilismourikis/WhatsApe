@@ -137,14 +137,14 @@ public class BrokerNode{
                         return;
                     } else if (input.startsWith("/channel")) { //user picks channel to send message, broker checks if he is registered and initialises the channel var to know where to keep incoming messages as history
                         synchronized (this) {
-                            if (channelSubs.get(input.substring(8)) != null) {
-                                if (channelSubs.get(input.substring(8)).contains(name)) channel = input.substring(8);
+                            if (channelSubs.get(input.substring(9)) != null) {
+                                if (channelSubs.get(input.substring(9)).contains(name)) channel = input.substring(8);
                             } else {
                                 var subs = channelSubs.get(input.substring(9));
                                 if (subs != null) {
                                     subs.add(name);
                                     channelSubs.put(input.substring(9), subs);
-                                    channel = input.substring(8);
+                                    channel = input.substring(9);
                                 } else {
                                     channelHistory.put(input.substring(9), new ArrayList<Value>(Arrays.asList(incomingObject)));
                                     channelSubs.put(input.substring(9), new ArrayList<String>(Arrays.asList(name)));

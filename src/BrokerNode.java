@@ -205,10 +205,10 @@ public class BrokerNode{
                     synchronized (channelHistory) {
                         var hist = channelHistory.get(channel);
                         if (hist != null) {
-                            hist.add(new MultimediaValue(channel, new MultimediaFile(videoName, name)));
+                            hist.add(new TextValue("server", "MESSAGE " + name + ": " + input));
                             channelHistory.replace(channel, hist);
                         } else {
-                            channelHistory.put(channel, new ArrayList<Value>(Arrays.asList(new MultimediaValue(channel, new MultimediaFile(videoName.substring(videoName.lastIndexOf("/") + 1), name)))));
+                            channelHistory.put(channel, new ArrayList<Value>(Arrays.asList(new TextValue("server", "MESSAGE " + name + ": " + input))));
                         }
                     }
 

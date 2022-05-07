@@ -116,16 +116,16 @@ public class BrokerNode{
                         } catch (IOException e) {
                             e.printStackTrace();
                         }
-                        try {
-                            synchronized (channelHistory) {
-                                var hist = channelHistory.get(channel);
-                                if (hist != null) {
-                                    hist.add(new MultimediaValue(channel, new MultimediaFile(videoName, name)));
-                                    channelHistory.replace(channel, hist);
-                                } else {
-                                    channelHistory.put(channel, new ArrayList<Value>(Arrays.asList(new MultimediaValue(channel, new MultimediaFile(videoName.substring(videoName.lastIndexOf("/") + 1), name)))));
-                                }
-                            }
+//                        try {
+//                            synchronized (channelHistory) {
+//                                var hist = channelHistory.get(channel);
+//                                if (hist != null) {
+//                                    hist.add(new MultimediaValue(channel, new MultimediaFile(videoName, name)));
+//                                    channelHistory.replace(channel, hist);
+//                                } else {
+//                                    channelHistory.put(channel, new ArrayList<Value>(Arrays.asList(new MultimediaValue(channel, new MultimediaFile(videoName.substring(videoName.lastIndexOf("/") + 1), name)))));
+//                                }
+//                            }
                         } catch (IOException e) {
                             e.printStackTrace();
                         } catch (TikaException e) {
@@ -200,6 +200,16 @@ public class BrokerNode{
                         videoName=input.substring(10);
                     }else if(input.startsWith("/gethistory")){
                         out.writeObject(channelHistory.get(input.substring(12)));
+                    }
+
+                    synchronized (channelHistory) {
+                        var hist = channelHistory.get(channel);
+                        if (hist != null) {
+                            hist.add(new MultimediaValue(channel, new MultimediaFile(videoName, name)));
+                            channelHistory.replace(channel, hist);
+                        } else {
+                            channelHistory.put(channel, new ArrayList<Value>(Arrays.asList(new MultimediaValue(channel, new MultimediaFile(videoName.substring(videoName.lastIndexOf("/") + 1), name)))));
+                        }
                     }
 
                     synchronized (writers) {

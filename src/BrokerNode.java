@@ -154,7 +154,7 @@ public class BrokerNode{
                             for(Value v : channelHistory.get(channel)){
                                 System.out.println(v.getMessage());
                             }
-                            System.out.println(channelHistory.size());
+                            System.out.println(channelHistory.get(channel).size());
                         }
                     }
                     else{

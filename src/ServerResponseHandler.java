@@ -43,7 +43,7 @@ public class ServerResponseHandler implements Runnable{
                             for(Value v : channelHistory){
                                 System.out.println(v.getMessage());
                             }
-
+                            System.out.println(channelHistory.size());
                             continue; //not to execute anything else
                         }catch(Exception e){
                             //do nothing

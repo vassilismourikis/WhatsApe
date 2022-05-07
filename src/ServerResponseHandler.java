@@ -28,7 +28,7 @@ public class ServerResponseHandler implements Runnable{
         DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss");
         ArrayList<byte[]> chunks = new ArrayList<byte[]>();
         Integer videonum=0;
-        String serverResponse=null;
+        ArrayList<Value> channelHistory=null;
             try{
 
                 while(true) {
@@ -39,7 +39,7 @@ public class ServerResponseHandler implements Runnable{
                     }
                     catch (ClassCastException ce) { //catch for pulling (when object is byte chunks)
                         try{ //try only for printing the history of a channel if goes to catch, it does nothing
-                            ArrayList<Value> channelHistory=(ArrayList<Value>)obj;
+                            channelHistory=(ArrayList<Value>)obj;
                             for(Value v : channelHistory){
                                 System.out.println(v.getMessage());
                             }

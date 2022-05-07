@@ -119,7 +119,7 @@ public class BrokerNode{
                         return;
                     } else if (input.startsWith("/channel")) { //user picks channel to send message, broker checks if he is registered and initialises the channel var to know where to keep incoming messages as history
                                 channel = input.substring(9);
-                                //synchronized (channelHistory) {
+                                synchronized (channelHistory) {
                                     if(!channelHistory.containsKey(channel)) {
 
                                         channelHistory.put(channel, new ArrayList<Value>());
@@ -127,7 +127,7 @@ public class BrokerNode{
 
                                         continue;
                                     }
-                                //}
+                                }
                     }
                     else if(input.startsWith("/getvideo")) {
                         ArrayList<byte[]> chunkss = (new MultimediaValue(null,new MultimediaFile(input.substring(10),"server"))).getMultimediaFile().getMultimediaFileChunk();
@@ -140,14 +140,14 @@ public class BrokerNode{
                     }else if(input.startsWith("VIDEONAME")) {
                         videoName=input.substring(10);
                     }else if(input.startsWith("/gethistory")){
-                        //synchronized (channelHistory) {
+                        synchronized (channelHistory) {
                             out.writeObject(channelHistory.get(input.substring(12)));
-                        //}
+                        }
                         continue;
                     }
 
                     if (channel != null) {
-                        //synchronized (channelHistory) {
+                        synchronized (channelHistory) {
                             ArrayList<Value> history = channelHistory.get(channel);
                             history.add(new TextValue("server",  name + ": " + input));
                             channelHistory.replace(channel, history);
@@ -155,7 +155,7 @@ public class BrokerNode{
                                 System.out.println(v.getMessage());
                             }
                             System.out.println(channelHistory.get(channel).size());
-                       // }
+                        }
                     }
                     else{
                         out.writeObject(new TextValue("server", "SPECIFY CHANNEL"));

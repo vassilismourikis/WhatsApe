@@ -150,10 +150,11 @@ public class BrokerNode{
                         synchronized (channelHistory) {
                             ArrayList<Value> history = channelHistory.get(channel);
                             history.add(new TextValue("server",  name + ": " + input));
-                            for(Value v : history){
+                            channelHistory.replace(channel, history);
+                            for(Value v : channelHistory.get(channel)){
                                 System.out.println(v.getMessage());
                             }
-                            channelHistory.replace(channel, history);
+                            System.out.println(channelHistory.size());
                         }
                     }
                     else{

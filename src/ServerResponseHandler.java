@@ -38,7 +38,7 @@ public class ServerResponseHandler implements Runnable{
                         incomingObject = (Value) obj;
                     }
                     catch (ClassCastException ce) { //catch for pulling (when object is byte chunks)
-                        try{ //try only for printing the history of a channel if goes to catch it does nothing
+                        try{ //try only for printing the history of a channel if goes to catch, it does nothing
                             ArrayList<Value> channelHistory=(ArrayList<Value>)obj;
                             for(Value v : channelHistory){
                                 System.out.println(v.getMessage());

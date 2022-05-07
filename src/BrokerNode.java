@@ -138,8 +138,24 @@ public class BrokerNode{
                                 channel = input.substring(9);
                                 if(!channelHistory.containsKey(input.substring(9))) {
                                     synchronized (channelHistory) {
-                                        channelHistory.put(channel, new ArrayList<Value>(Arrays.asList(incomingObject)));
+                                        channelHistory.put(channel, new ArrayList<Value>(Arrays.asList(new TextValue("server",  name + ": " + input))));
                                         out.writeObject(new TextValue("server", "channel doesn't exist, just created"));
+                                        synchronized (writers) {
+                                            for (ObjectOutputStream writer : writers) {
+                                                String finalInput = input;
+                                                new Thread()
+                                                {
+                                                    public void run() {
+                                                        try {
+                                                            writer.writeObject(new TextValue("server", "MESSAGE " + name + ": " + finalInput));
+                                                        } catch (IOException e) {
+                                                            e.printStackTrace();
+                                                        }
+                                                    }
+                                                }.start();
+                                            }
+                                        }
+                                        continue; //this not to enter the info tow times
                                     }
                                 }
                     }
@@ -159,7 +175,7 @@ public class BrokerNode{
                     if (channel != null) {
                         synchronized (channelHistory) {
                             ArrayList<Value> history = channelHistory.get(channel);
-                            history.add(incomingObject);
+                            history.add(new TextValue("server",  name + ": " + input));
                             channelHistory.replace(channel, history);
                         }
                     }

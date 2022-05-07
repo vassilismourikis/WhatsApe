@@ -17,7 +17,7 @@ public class BrokerNode{
     private static Set<String> names = new HashSet<>();
 
     // The set of all the print writers for all the clients, used for broadcast.
-    private static Set<ObjectOutputStream> writers = new HashSet<>();
+    //private static Set<ObjectOutputStream> writers = new HashSet<>();
 
     public static void main(String[] args) throws Exception {
         System.out.println("The chat server is running...");
@@ -83,12 +83,12 @@ public class BrokerNode{
                 // But BEFORE THAT, let everyone else know that the new person has joined!
                 out.writeObject(new TextValue("server", "NAMEACCEPTED" + name));
                 out.flush();
-                synchronized (writers) {
-                    for (ObjectOutputStream writer : writers) {
-                        writer.writeObject(new TextValue("server", "MESSAGE " + name + " has joined"));
-                    }
-                    writers.add(out);
-                }
+//                synchronized (writers) {
+//                    for (ObjectOutputStream writer : writers) {
+//                        writer.writeObject(new TextValue("server", "MESSAGE " + name + " has joined"));
+//                    }
+//                    writers.add(out);
+//                }
                 // Accept messages from this client and broadcast them.
                 while (true) {
                     obj = in.readObject();
@@ -168,41 +168,41 @@ public class BrokerNode{
                         out.flush();
                     }
 
-                    synchronized (writers) {
-                        for (ObjectOutputStream writer : writers) {
-                            String finalInput = input;
-                            new Thread()
-                            {
-                                public void run() {
-                                    try {
-                                        writer.writeObject(new TextValue("server", "MESSAGE " + name + ": " + finalInput));
-                                    } catch (IOException e) {
-                                        e.printStackTrace();
-                                    }
-                                }
-                            }.start();
-                        }
-                    }
+//                    synchronized (writers) {
+//                        for (ObjectOutputStream writer : writers) {
+//                            String finalInput = input;
+//                            new Thread()
+//                            {
+//                                public void run() {
+//                                    try {
+//                                        writer.writeObject(new TextValue("server", "MESSAGE " + name + ": " + finalInput));
+//                                    } catch (IOException e) {
+//                                        e.printStackTrace();
+//                                    }
+//                                }
+//                            }.start();
+//                        }
+//                    }
                 }
             } catch (Exception e) {
                 e.printStackTrace();
             } finally {
-                synchronized (this){
-                if (out != null) {
-                    writers.remove(out);
-                }
-                if (name != null) {
-                    System.out.println(name + " is leaving");
-                    names.remove(name);
-                    for (ObjectOutputStream writer : writers) {
-                        try {
-                            writer.writeObject(new TextValue("server", "MESSAGE " + name + " has left"));
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
-                    }
-                }
-            }
+//                synchronized (this){
+//                if (out != null) {
+//                    writers.remove(out);
+//                }
+//                if (name != null) {
+//                    System.out.println(name + " is leaving");
+//                    names.remove(name);
+//                    for (ObjectOutputStream writer : writers) {
+//                        try {
+//                            writer.writeObject(new TextValue("server", "MESSAGE " + name + " has left"));
+//                        } catch (IOException e) {
+//                            e.printStackTrace();
+//                        }
+//                    }
+//                }
+//            }
                 try {
                     socket.close();
                 } catch (IOException e) {

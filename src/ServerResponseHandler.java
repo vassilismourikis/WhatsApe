@@ -34,28 +34,22 @@ public class ServerResponseHandler implements Runnable{
 
                 while(true) {
                     obj = in.readObject();
-                    try { //try only for printing the history of a channel if goes to catch, it does nothing
-                        channelHistory = (ArrayList<Value>) obj;
-                        System.out.println(channelHistory.size() +"FIRST");
+                    try{ //try only for printing the history of a channel if goes to catch, it does nothing
+                        channelHistory=(ArrayList<Value>)obj;
+                        for(Value v : channelHistory){
+                            System.out.println(v.getMessage());
+                        }
+                        System.out.println(channelHistory.size());
+                        continue; //not to execute anything else
+                    }catch(Exception e){
+                        //do nothing
+                        System.out.println("CATCH OF HISTORY");
                     }
-                    catch (Exception e){}
                     Value incomingObject=null;
                     try {
                         incomingObject = (Value) obj;
                     }
                     catch (ClassCastException ce) { //catch for pulling (when object is byte chunks)
-                        try{ //try only for printing the history of a channel if goes to catch, it does nothing
-                            channelHistory=(ArrayList<Value>)obj;
-                            for(Value v : channelHistory){
-                                System.out.println(v.getMessage());
-                            }
-                            System.out.println(channelHistory.size());
-                            continue; //not to execute anything else
-                        }catch(Exception e){
-                            //do nothing
-                            System.out.println("CATCH OF HISTORY");
-                        }
-
                         if (chunks.isEmpty()) videonum++;
                         try {
                             client.sendResp("Receiving video chunks");

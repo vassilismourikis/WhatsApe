@@ -29,6 +29,7 @@ public class UserNode {
     public void sendResp(String resp) throws IOException {
         System.out.println("message send");
         out.writeObject(new TextValue(getProfileName(),resp));
+        out.flush();
     }
 
 
@@ -48,19 +49,23 @@ public class UserNode {
                 if(input.startsWith("/name")){
                     client.setProfileName(input.substring(5));
                     out.writeObject(new TextValue(getProfileName(),client.getProfileName()));
+                    out.flush();
                     continue;
                 }else if(input.startsWith("/channel")){ //user picks channel to send message, broker checks if he is registered and initialises the channel var to know where to keep incoming messages as history
                         channel = input.substring(9);
                         out.writeObject(new TextValue(channel,input));
+                    out.flush();
                 }else if(input.startsWith("/upload")){
                     push(new MultimediaValue(null,new MultimediaFile(input.substring(8),client.getProfileName())));
                 }else if(input.startsWith("/getvideo")) {
                     pull(input);
                 }else if(input.startsWith("/gethistory")){
                     out.writeObject(new TextValue(channel,input));
+                    out.flush();
                 }
                 else{
                     out.writeObject(new TextValue(channel,input));
+                    out.flush();
                 }
 
 
@@ -74,13 +79,17 @@ public class UserNode {
     public static void push(MultimediaValue file) throws IOException {
         ArrayList<byte[]> chunks = file.getMultimediaFile().getMultimediaFileChunk();
         out.writeObject(new TextValue(getProfileName(), "VIDEONAME "+file.getMultimediaFile().getMultimediaFileName()));
+        out.flush();
         for(byte[] chunk : chunks) {
             out.writeObject(chunk);
+            out.flush();
         }
         out.writeObject(null);
+        out.flush();
     }
 
     public static void pull(String topic) throws IOException {
         out.writeObject(new TextValue(channel,topic));
+        out.flush();
     }
 }

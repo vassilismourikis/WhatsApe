@@ -65,6 +65,7 @@ public class BrokerNode{
                 // Keep requesting a name until we get a unique one.
                 while (true) {
                     out.writeObject(new TextValue("server", "SUBMITNAME"));
+                    out.flush();
                     name = ((TextValue) in.readObject()).getMessage();
                     if (name == null) {
                         return;
@@ -81,6 +82,7 @@ public class BrokerNode{
                 // to the set of all writers so this client can receive broadcast messages.
                 // But BEFORE THAT, let everyone else know that the new person has joined!
                 out.writeObject(new TextValue("server", "NAMEACCEPTED" + name));
+                out.flush();
                 synchronized (writers) {
                     for (ObjectOutputStream writer : writers) {
                         writer.writeObject(new TextValue("server", "MESSAGE " + name + " has joined"));
@@ -96,6 +98,7 @@ public class BrokerNode{
                     }catch (ClassCastException ce) {
                             try {
                                 out.writeObject(new TextValue("server","Receiving video chunks"));
+                                out.flush();
                             } catch (IOException e) {
                                 e.printStackTrace();
                             }
@@ -124,7 +127,7 @@ public class BrokerNode{
 
                                         channelHistory.put(channel, new ArrayList<Value>());
                                         out.writeObject(new TextValue("server", "channel doesn't exist, just created"));
-
+                                        out.flush();
                                         continue;
                                     }
                                 }
@@ -133,15 +136,18 @@ public class BrokerNode{
                         ArrayList<byte[]> chunkss = (new MultimediaValue(null,new MultimediaFile(input.substring(10),"server"))).getMultimediaFile().getMultimediaFileChunk();
                         for(byte[] chunk : chunkss) {
                             out.writeObject(chunk);
+                            out.flush();
                             in.readObject();
                         }
                         out.writeObject(null);
+                        out.flush();
                         continue;
                     }else if(input.startsWith("VIDEONAME")) {
                         videoName=input.substring(10);
                     }else if(input.startsWith("/gethistory")){
                         synchronized (channelHistory) {
                             out.writeObject(channelHistory.get(input.substring(12)));
+                            out.flush();
                         }
                         continue;
                     }
@@ -159,6 +165,7 @@ public class BrokerNode{
                     }
                     else{
                         out.writeObject(new TextValue("server", "SPECIFY CHANNEL"));
+                        out.flush();
                     }
 
                     synchronized (writers) {

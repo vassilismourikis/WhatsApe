@@ -60,8 +60,11 @@ public class UserNode {
                 }else if(input.startsWith("/getvideo")) {
                     pull(input);
                 }else if(input.startsWith("/gethistory")){
+                    //for some reason get history not working after the first time (MUST INVESTIGATE)
+                    //so we restart the connection after every time
                     out.writeObject(new TextValue(channel,input));
                     out.flush();
+                    out.reset();
                 }
                 else{
                     out.writeObject(new TextValue(channel,input));

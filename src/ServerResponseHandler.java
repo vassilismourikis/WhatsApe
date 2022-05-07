@@ -43,7 +43,6 @@ public class ServerResponseHandler implements Runnable{
                         continue; //not to execute anything else
                     }catch(Exception e){
                         //do nothing
-                        System.out.println("CATCH OF HISTORY");
                     }
                     Value incomingObject=null;
                     try {

@@ -9,7 +9,7 @@ public class UserNode {
     static Scanner scanner = new Scanner(System.in);
     static String serverAddress;
     static ObjectOutputStream out;
-    static List<BrokerInfo> brokers=new ArrayList<BrokerInfo>(Arrays.asList(new BrokerInfo("192.168.1.15")));//new BrokerInfo("192.168.1.14"),new BrokerInfo("192.168.1.11"),
+    static List<BrokerInfo> brokers=new ArrayList<BrokerInfo>(Arrays.asList(new BrokerInfo("192.168.1.14")));//new BrokerInfo("192.168.1.14"),new BrokerInfo("192.168.1.11"),
     static String channel=null;
 
 
@@ -56,6 +56,8 @@ public class UserNode {
                     push(new MultimediaValue(null,new MultimediaFile(input.substring(8),client.getProfileName())));
                 }else if(input.startsWith("/getvideo")) {
                     pull(input);
+                }else if(input.startsWith("/gethistory")){
+                    out.writeObject(new TextValue(channel,input));
                 }
                 else{
                     out.writeObject(new TextValue(channel,input));

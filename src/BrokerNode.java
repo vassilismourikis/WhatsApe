@@ -198,12 +198,23 @@ public class BrokerNode{
                         out.writeObject(null);
                     }else if(input.startsWith("VIDEONAME")) {
                         videoName=input.substring(10);
+                    }else if(input.startsWith("/gethistory")){
+                        out.writeObject(channelHistory.get(input.substring(12)));
                     }
 
                     synchronized (writers) {
                         for (ObjectOutputStream writer : writers) {
-                            //TODO: THREAD
-                            writer.writeObject(new TextValue("server", "MESSAGE " + name + ": " + input));
+                            String finalInput = input;
+                            new Thread()
+                            {
+                                public void run() {
+                                    try {
+                                        writer.writeObject(new TextValue("server", "MESSAGE " + name + ": " + finalInput));
+                                    } catch (IOException e) {
+                                        e.printStackTrace();
+                                    }
+                                }
+                            }.start();
                         }
                     }
                 }

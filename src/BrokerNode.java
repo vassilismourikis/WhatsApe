@@ -139,9 +139,7 @@ public class BrokerNode{
                     }else if(input.startsWith("VIDEONAME")) {
                         videoName=input.substring(10);
                     }else if(input.startsWith("/gethistory")){
-                        ArrayList<Value> ar=channelHistory.get(input.substring(12));
-                        out.writeObject(ar);
-                        channelHistory.replace(channel,ar);
+                        out.writeObject(channelHistory.get(input.substring(12)));
                     }
 
                     if (channel != null) {
@@ -149,6 +147,7 @@ public class BrokerNode{
                             ArrayList<Value> history = channelHistory.get(channel);
                             history.add(new TextValue("server",  name + ": " + input));
                             channelHistory.replace(channel, history);
+                            System.out.println("STILL WRITING TO CHANNEL");
                         }
                     }
                     else{

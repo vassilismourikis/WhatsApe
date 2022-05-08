@@ -10,7 +10,8 @@ public class UserNode {
     static Scanner scanner = new Scanner(System.in);
     static String serverAddress;
     static ObjectOutputStream out;
-    static List<BrokerInfo> brokers=new ArrayList<BrokerInfo>(Arrays.asList(new BrokerInfo("192.168.1.14"),new BrokerInfo("192.168.1.11"),new BrokerInfo("192.168.1.15")));
+    static List<BrokerInfo> brokers=new ArrayList<BrokerInfo>(Arrays.asList(new BrokerInfo("192.168.1.14"),new BrokerInfo("192.168.1.16"),new BrokerInfo("192.168.1.13")));
+    static List<BrokerInfo> sortedBrokers=new ArrayList<BrokerInfo>();
     static String channel=null;
     static ArrayList<BigInteger> brokerHashes=new ArrayList<BigInteger>() {
         {
@@ -29,6 +30,16 @@ public class UserNode {
         Collections.sort(brokerHashes);
         for(BigInteger b : brokerHashes){
             System.out.println(b);
+        }
+        BrokerInfo b=brokers.get(0);
+        int counter=0,num=0;
+        while(sortedBrokers.size()<3){//sorting brokers array
+            if(b.getMaxHash()==brokerHashes.get(counter)) {
+                sortedBrokers.add(b);
+                counter++;
+            }
+            if(num==3) num=0;
+            b=brokers.get(num++);
         }
     }
 
@@ -52,7 +63,8 @@ public class UserNode {
 
         UserNode client = new UserNode(brokers.get(new Random().nextInt(brokers.size())).getIp(),"");
         try {
-            var socket = new Socket(client.serverAddress, 9090);
+            String otherPeer=brokers.get(new Random().nextInt(brokers.size())).getIp();
+            var socket = new Socket(otherPeer, 9090);
             out = new ObjectOutputStream(socket.getOutputStream());
             ServerResponseHandler serverConn = new ServerResponseHandler(socket,client);
             new Thread(serverConn).start();
@@ -67,6 +79,53 @@ public class UserNode {
                     continue;
                 }else if(input.startsWith("/channel")){ //user picks channel to send message, broker checks if he is registered and initialises the channel var to know where to keep incoming messages as history
                     channel = input.substring(9);
+                    BigInteger channelHash=MD5.getMd5(channel);
+                    if(channelHash.mod(brokerHashes.get(2)).compareTo(sortedBrokers.get(0).getMaxHash())<0){
+                        if(!otherPeer.equals(sortedBrokers.get(0).getIp())){
+                            otherPeer=sortedBrokers.get(0).getIp();
+                            socket = new Socket(otherPeer, 9090);
+                            out = new ObjectOutputStream(socket.getOutputStream());
+                            serverConn.stop();
+                            serverConn = new ServerResponseHandler(socket,client);
+                            new Thread(serverConn).start();
+                            out.writeObject(new TextValue(getProfileName(),"/name "+client.getProfileName()));
+                            out.flush();
+                            out.writeObject(new TextValue(channel,input));
+                            out.flush();
+                            continue;
+                        }
+
+                    }else if(channelHash.mod(brokerHashes.get(2)).compareTo(sortedBrokers.get(1).getMaxHash())<0){
+                        if(!otherPeer.equals(sortedBrokers.get(1).getIp())){
+                            otherPeer=sortedBrokers.get(1).getIp();
+                            socket = new Socket(otherPeer, 9090);
+                            out = new ObjectOutputStream(socket.getOutputStream());
+                            serverConn.stop();
+                            serverConn = new ServerResponseHandler(socket,client);
+                            new Thread(serverConn).start();
+                            out.writeObject(new TextValue(getProfileName(),"/name "+client.getProfileName()));
+                            out.flush();
+                            out.writeObject(new TextValue(channel,input));
+                            out.flush();
+                            continue;
+                        }
+
+                    }else if(channelHash.mod(brokerHashes.get(2)).compareTo(sortedBrokers.get(2).getMaxHash())<0){
+                        if(!otherPeer.equals(sortedBrokers.get(2).getIp())){
+                            otherPeer=sortedBrokers.get(2).getIp();
+                            socket = new Socket(otherPeer, 9090);
+                            out = new ObjectOutputStream(socket.getOutputStream());
+                            serverConn.stop();
+                            serverConn = new ServerResponseHandler(socket,client);
+                            new Thread(serverConn).start();
+                            out.writeObject(new TextValue(getProfileName(),"/name "+client.getProfileName()));
+                            out.flush();
+                            out.writeObject(new TextValue(channel,input));
+                            out.flush();
+                            continue;
+                        }
+
+                    }
                     out.writeObject(new TextValue(channel,input));
                     out.flush();
                 }else if(input.startsWith("/upload")){

@@ -16,11 +16,17 @@ public class ServerResponseHandler implements Runnable{
     private ObjectInputStream in;
     private UserNode client;
     Object obj = null;
+    boolean exit=false;
 
     public ServerResponseHandler(Socket s,UserNode c) throws IOException {
         this.server = s;
         this.in = new ObjectInputStream(server.getInputStream());
         this.client=c;
+    }
+
+
+    public void stop(){
+        exit=true;
     }
 
     @Override
@@ -32,7 +38,7 @@ public class ServerResponseHandler implements Runnable{
         ArrayList<Value> channelHistory=null;
             try{
 
-                while(true) {
+                while(!exit) {
                     obj = in.readObject();
                     try{ //try only for printing the history of a channel if goes to catch, it does nothing
                         channelHistory=(ArrayList<Value>)obj;

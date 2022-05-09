@@ -1,8 +1,21 @@
-public class Value {
+import java.io.Serializable;
 
-    private MultimediaFile multimediaFile;
+public class Value implements Serializable {
+    private String publisherName;
 
-    public Value(MultimediaFile multimediaFile) {
-        this.multimediaFile = multimediaFile;
+    public Value(String name){
+        this.publisherName=name;
     }
+
+    public String getPublisherName() {
+        return publisherName;
+    }
+
+    public void setPublisherName(String publisherName) {
+        this.publisherName = publisherName;
+    }
+
+    public String getMessage(){return null;}
+
+
 }

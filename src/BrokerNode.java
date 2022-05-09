@@ -1,24 +1,23 @@
-import java.io.IOException;
-import java.io.PrintWriter;
+import org.apache.commons.lang3.ObjectUtils;
+import org.apache.tika.exception.TikaException;
+import org.xml.sax.SAXException;
+
+import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Scanner;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.Executors;
 
-public class BrokerNode implements Broker{
+public class BrokerNode{
 
-    private List<Consumer> registeredConsumers;
-    private List<Publisher> registeredPublishers;
-    private List<Broker> brokers;
+    private static List<BrokerInfo> brokers=new ArrayList<BrokerInfo>(Arrays.asList(new BrokerInfo("192.168.1.10"),new BrokerInfo("192.168.1.11"),new BrokerInfo("192.168.1.13")));
+    private static HashMap<String, ArrayList<Value>> channelHistory =new HashMap<String, ArrayList<Value>>();
 
     // All client names, so we can check for duplicates upon registration.
     private static Set<String> names = new HashSet<>();
 
     // The set of all the print writers for all the clients, used for broadcast.
-    private static Set<PrintWriter> writers = new HashSet<>();
+    private static Set<ObjectOutputStream> writers = new HashSet<>();
 
     public static void main(String[] args) throws Exception {
         System.out.println("The chat server is running...");
@@ -30,66 +29,12 @@ public class BrokerNode implements Broker{
         }
     }
 
-    @Override
-    public Consumer acceptConnection(Consumer consumer) {
-        return null;
-    }
-
-    @Override
-    public Publisher acceptConnection(Publisher publisher) {
-        return null;
-    }
-
-    @Override
-    public void calculateKeys() {
-
-    }
-
-    @Override
-    public void filterConsumers(String con) {
-
-    }
-
-    @Override
-    public void notifyBrokersOnChanges() {
-
-    }
-
-    @Override
-    public void notifyPublisher(String pub) {
-
-    }
-
-    @Override
-    public void pull(String top) {
-
-    }
-
-    @Override
-    public void connect() {
-
-    }
-
-    @Override
-    public void disconnect() {
-
-    }
-
-    @Override
-    public void init() {
-
-    }
-
-    @Override
-    public void updateNodes() {
-
-    }
 
     private static class Handler implements Runnable {
         private String name;
         private Socket socket;
-        private Scanner in;
-        private PrintWriter out;
+        private ObjectInputStream in;
+        private ObjectOutputStream out;
 
         /**
          * Constructs a handler thread, squirreling away the socket. All the interesting
@@ -107,14 +52,21 @@ public class BrokerNode implements Broker{
          * broadcasts them.
          */
         public void run() {
+            //used for receiving video chunks
+            ArrayList<byte[]> chunks = new ArrayList<byte[]>();
+            Object obj = null;
+            String channel=null;
+            String videoName=null;
+            //used for receiving video chunks
             try {
-                in = new Scanner(socket.getInputStream());
-                out = new PrintWriter(socket.getOutputStream(), true);
+                in = new ObjectInputStream(socket.getInputStream());
+                out = new ObjectOutputStream(socket.getOutputStream());
 
                 // Keep requesting a name until we get a unique one.
                 while (true) {
-                    out.println("SUBMITNAME");
-                    name = in.nextLine();
+                    out.writeObject(new TextValue("server", "SUBMITNAME"));
+                    out.flush();
+                    name = ((TextValue) in.readObject()).getMessage();
                     if (name == null) {
                         return;
                     }
@@ -129,41 +81,147 @@ public class BrokerNode implements Broker{
                 // Now that a successful name has been chosen, add the socket's print writer
                 // to the set of all writers so this client can receive broadcast messages.
                 // But BEFORE THAT, let everyone else know that the new person has joined!
-                out.println("NAMEACCEPTED " + name);
-                for (PrintWriter writer : writers) {
-                    writer.println("MESSAGE " + name + " has joined");
+                out.writeObject(new TextValue("server", "NAMEACCEPTED" + name));
+                out.flush();
+                synchronized (writers) {
+                    for (ObjectOutputStream writer : writers) {
+                        writer.writeObject(new TextValue("server", "MESSAGE " + name + " has joined"));
+                    }
+                    writers.add(out);
                 }
-                writers.add(out);
-
                 // Accept messages from this client and broadcast them.
                 while (true) {
-                    String input = in.nextLine();
-                    if (input.toLowerCase().startsWith("/quit")) {
-                        return;
+                    obj = in.readObject();
+                    Value incomingObject=null;
+                    try {
+                        incomingObject = (Value) obj;
+                    }catch (ClassCastException ce) {
+                            try {
+                                out.writeObject(new TextValue("server","Receiving video chunks"));
+                                out.flush();
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
+                            chunks.add((byte[]) obj);
+                            continue;
                     }
-                    for (PrintWriter writer : writers) {
-                        writer.println("MESSAGE " + name + ": " + input);
+                    String input =null;
+                    try {
+                        input = ((TextValue) incomingObject).getMessage();
+                    }catch (NullPointerException n){
+                        try {
+                            writeBytesToFile(videoName.substring(videoName.lastIndexOf("/") + 1), chunks);
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                        chunks= new ArrayList<byte[]>();
+                        continue;
+                    }
+
+                    if (input.toLowerCase().startsWith("/quit")) { //disconnect
+                        return;
+                    } else if (input.startsWith("/channel")) { //user picks channel to send message, broker checks if he is registered and initialises the channel var to know where to keep incoming messages as history
+                                channel = input.substring(9);
+                                synchronized (channelHistory) {
+                                    if(!channelHistory.containsKey(channel)) {
+
+                                        channelHistory.put(channel, new ArrayList<Value>());
+                                        out.writeObject(new TextValue("server", "channel doesn't exist, just created"));
+                                        out.flush();
+                                        continue;
+                                    }
+                                }
+                    }
+                    else if(input.startsWith("/getvideo")) {
+                        ArrayList<byte[]> chunkss = (new MultimediaValue(null,new MultimediaFile(input.substring(10),"server"))).getMultimediaFile().getMultimediaFileChunk();
+                        for(byte[] chunk : chunkss) {
+                            out.writeObject(chunk);
+                            out.flush();
+                            in.readObject();
+                        }
+                        out.writeObject(null);
+                        out.flush();
+                        continue;
+                    }else if(input.startsWith("VIDEONAME")) {
+                        videoName=input.substring(10);
+                    }else if(input.startsWith("/gethistory")){
+                        synchronized (channelHistory) {
+                            out.writeObject(new ArrayList<Value>(channelHistory.get(input.substring(12))));
+                            out.flush();
+                        }
+                        continue;
+                    }
+
+                    if (channel != null) {
+                        synchronized (channelHistory) {
+                            ArrayList<Value> history = channelHistory.get(channel);
+                            history.add(new TextValue("server",  name + ": " + input));
+                            channelHistory.replace(channel, history);
+                            for(Value v : channelHistory.get(channel)){
+                                System.out.println(v.getMessage());
+                            }
+                            System.out.println(channelHistory.get(channel).size());
+                        }
+                    }
+                    else{
+                        out.writeObject(new TextValue("server", "SPECIFY CHANNEL"));
+                        out.flush();
+                    }
+
+                    synchronized (writers) {
+                        for (ObjectOutputStream writer : writers) {
+                            String finalInput = input;
+                            new Thread()
+                            {
+                                public void run() {
+                                    try {
+                                        writer.writeObject(new TextValue("server", "MESSAGE " + name + ": " + finalInput));
+                                    } catch (IOException e) {
+                                        e.printStackTrace();
+                                    }
+                                }
+                            }.start();
+                        }
                     }
                 }
             } catch (Exception e) {
-                System.out.println(e);
+                e.printStackTrace();
             } finally {
+                synchronized (this){
                 if (out != null) {
                     writers.remove(out);
                 }
                 if (name != null) {
                     System.out.println(name + " is leaving");
                     names.remove(name);
-                    for (PrintWriter writer : writers) {
-                        writer.println("MESSAGE " + name + " has left");
+                    for (ObjectOutputStream writer : writers) {
+                        try {
+                            writer.writeObject(new TextValue("server", "MESSAGE " + name + " has left"));
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
                     }
                 }
+            }
                 try {
                     socket.close();
                 } catch (IOException e) {
                 }
             }
         }
-    }
 
+    }
+    public static void writeBytesToFile(String fileName, ArrayList<byte[]> bytes)
+            throws IOException {
+
+
+        File file = new File(fileName);
+        BufferedOutputStream fileOutput = new BufferedOutputStream(new FileOutputStream(file));
+
+        for(byte[] bytee : bytes){
+            fileOutput.write(bytee);
+        }
+        fileOutput.close();
+
+    }
 }

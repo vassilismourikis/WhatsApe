@@ -1,3 +1,5 @@
+package com.example.whatsape;
+
 import java.io.Serializable;
 
 public class Value implements Serializable {

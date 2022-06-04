@@ -1,3 +1,7 @@
+import com.example.whatsape.MultimediaFile;
+import com.example.whatsape.MultimediaValue;
+import com.example.whatsape.TextValue;
+
 import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.math.BigInteger;

@@ -1,3 +1,5 @@
+package com.example.whatsape;
+
 public class MultimediaValue extends Value{
 
     private MultimediaFile multimediaFile;

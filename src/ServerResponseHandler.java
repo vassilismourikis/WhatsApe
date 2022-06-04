@@ -1,5 +1,5 @@
-import org.apache.tika.exception.TikaException;
-import org.xml.sax.SAXException;
+import com.example.whatsape.TextValue;
+import com.example.whatsape.Value;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;

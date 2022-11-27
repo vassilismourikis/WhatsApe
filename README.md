@@ -1,6 +1,6 @@
 # WhatsApe
 
-Project for Distributed Systems University cource. Its a Tik Tok android clone.
+Project for Distributed Systems University cource. Its a WhatsApp android clone.
 
 https://archive.apache.org/dist/tika/2.3.0/
 
